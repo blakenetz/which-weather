@@ -5,30 +5,36 @@ import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class LocationService {
-  url: URL;
-  search: URLSearchParams;
-  cacheKey = 'location';
+  url: string;
+  search: Record<string, string>;
 
   constructor(private readonly httpService: HttpService) {
-    this.url = new URL('http://api.openweathermap.org/geo/1.0/direct');
-    this.search = new URLSearchParams({
-      q: '',
-      limit: '5',
-      appid: process.env.OPEN_WEATHER_KEY!,
-    });
+    this.url = 'http://api.openweathermap.org/geo/1.0/direct';
+    this.search = { q: '', limit: '5', appid: process.env.OPEN_WEATHER_KEY! };
   }
 
-  private async queryOpenWeather(q: string): Promise<WeatherLocation[]> {
-    this.search.set('q', q);
-    this.url.search = this.search.toString();
+  private generateUrl(q: string) {
+    const url = new URL(this.url);
+    const search = new URLSearchParams(this.search);
 
-    const { data } = await firstValueFrom(
-      this.httpService.get<WeatherLocation[]>(this.url.toString()),
+    search.set('q', q);
+    url.search = search.toString();
+
+    return url.toString();
+  }
+
+  private async queryOpenWeather(q: string): Promise<WeatherLocation[] | null> {
+    const url = this.generateUrl(q);
+
+    const res = await firstValueFrom(
+      this.httpService.get<WeatherLocation[]>(url),
     );
-    return data;
+    if (res.status === 200 && res.data.length) return res.data;
+
+    return null;
   }
 
-  async getLocations(q: string): Promise<WeatherLocation[]> {
+  async getLocations(q: string): Promise<WeatherLocation[] | null> {
     return this.queryOpenWeather(q);
   }
 }

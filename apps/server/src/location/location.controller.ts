@@ -29,7 +29,10 @@ export class LocationController {
     }
 
     const cached = await this.cacheManager.get<WeatherLocation[]>(body.q);
-    if (cached) return cached;
+    if (cached) {
+      console.log(`🌞 successfully fetched "${body.q}" from cache`);
+      return cached;
+    }
 
     const locations = await this.locationService.getLocations(body.q);
     if (locations) {
