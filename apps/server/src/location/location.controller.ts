@@ -1,10 +1,23 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  HttpStatus,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
+import { NoFilesInterceptor } from '@nestjs/platform-express';
+import { LocationService } from './location.service';
 
 @Controller('location')
 export class LocationController {
-  @Get()
-  findAll(@Req() request: Request): string {
-    console.log(request);
-    return 'This action returns all cats';
+  constructor(private readonly locationService: LocationService) {}
+
+  @Post()
+  @UseInterceptors(NoFilesInterceptor())
+  findAll(@Body() body: { q?: string }): object {
+    if (body.q) return this.locationService.getLocation(body.q);
+
+    throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
   }
 }

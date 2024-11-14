@@ -3,11 +3,27 @@ import { Container, OutlinedInput } from "@mui/material";
 import styles from "./App.module.css";
 import React from "react";
 
+const url = new URL("location", import.meta.env.VITE_SERVER).toString();
+
 export default function App() {
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log(e);
-  };
+
+    try {
+      const res = await fetch(url, {
+        method: "post",
+        body: new FormData(e.currentTarget),
+      });
+      if (!res.ok) {
+        console.log(res.status, res.statusText);
+        return "bad";
+      }
+      const data = await res.json();
+      console.log(data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
 
   return (
     <Container maxWidth="xl" className={styles.container}>
