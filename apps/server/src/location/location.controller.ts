@@ -3,21 +3,40 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  Inject,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import { LocationService } from './location.service';
+import { CACHE_MANAGER, CacheKey } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { WeatherLocation } from '@server/types';
 
 @Controller('location')
+@CacheKey('location')
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(
+    private readonly locationService: LocationService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   @Post()
   @UseInterceptors(NoFilesInterceptor())
-  findAll(@Body() body: { q?: string }): object {
-    if (body.q) return this.locationService.getLocation(body.q);
+  async findAll(@Body() body: { q?: string }): Promise<WeatherLocation[]> {
+    if (!body.q) {
+      throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
-    throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
+    const cached = await this.cacheManager.get<WeatherLocation[]>(body.q);
+    if (cached) return cached;
+
+    const locations = await this.locationService.getLocations(body.q);
+    if (locations) {
+      this.cacheManager.set(body.q, locations);
+      return locations;
+    }
+
+    throw new HttpException('Client Error', HttpStatus.SERVICE_UNAVAILABLE);
   }
 }
