@@ -1,11 +1,9 @@
-import { Container, SxProps, Theme } from "@mui/material";
+import { Container, styled } from "@mui/material";
 import Form from "./components/Form";
 import Forecast from "./components/Forecast";
-import Error from "./components/Error";
-import { Endpoints } from "@server/types";
-import React from "react";
+import ErrorProvider from "./context/ErrorProvider";
 
-const containerSx: SxProps = {
+const StyledContainer = styled(Container)({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -13,25 +11,21 @@ const containerSx: SxProps = {
   position: "relative",
   p: 1,
   minHeight: "100dvh",
-};
-
-const formSx: SxProps<Theme> = ({ breakpoints }) => ({
-  mt: "15dvh",
-  width: "100%",
-  maxWidth: breakpoints.values["sm"],
 });
 
+const StyledForm = styled(Form)(({ theme }) => ({
+  marginTop: "15dvh",
+  width: "100%",
+  maxWidth: theme.breakpoints.values["sm"],
+}));
+
 export default function App() {
-  const [_error, setError] = React.useState<
-    Endpoints | "unknown" | undefined
-  >();
-
   return (
-    <Container maxWidth="xl" sx={containerSx}>
-      <Error handleClose={() => setError(undefined)} />
-
-      <Form handleError={setError} sx={formSx} />
-      <Forecast />
-    </Container>
+    <ErrorProvider>
+      <StyledContainer maxWidth="xl">
+        <StyledForm />
+        <Forecast />
+      </StyledContainer>
+    </ErrorProvider>
   );
 }

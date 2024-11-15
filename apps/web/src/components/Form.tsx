@@ -1,32 +1,26 @@
-import { Close, Search } from "@mui/icons-material";
+import { Search } from "@mui/icons-material";
 import {
   Box,
   BoxProps,
-  IconButton,
   Menu,
   MenuItem,
   OutlinedInput,
-  Snackbar,
-  SnackbarCloseReason,
   Typography,
 } from "@mui/material";
 import { debounce } from "lodash";
 import React from "react";
-import { Endpoints, WeatherLocation } from "@server/types";
+import { WeatherLocation } from "@server/types";
+import { ErrorContext } from "@web/context/ErrorContext";
 
 const locationURL = new URL("location", import.meta.env.VITE_SERVER).toString();
 const forecastURL = new URL("forecast", import.meta.env.VITE_SERVER).toString();
 
-interface FormProps extends BoxProps<"form"> {
-  handleError: (type: Endpoints | "unknown") => void;
-}
-
-export default function Form({ handleError, ...props }: FormProps) {
+export default function Form(props: BoxProps<"form">) {
   const ref = React.useRef<HTMLInputElement>(null);
+  const errorCtx = React.useContext(ErrorContext);
 
   const [options, setOptions] = React.useState<WeatherLocation[]>([]);
   const [selected, setSelected] = React.useState<WeatherLocation | null>(null);
-  const [showErrorSnackbar, toggleErrorSnackbar] = React.useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedOnChange = React.useCallback(debounce(fetchData, 500), []);
@@ -44,9 +38,9 @@ export default function Form({ handleError, ...props }: FormProps) {
     })
       .then(async (res) => {
         if (res.status === 200) setOptions((await res.json()) ?? []);
-        else toggleErrorSnackbar(true);
+        else errorCtx.setError("autocomplete");
       })
-      .catch(() => handleError("location"));
+      .catch(() => errorCtx.setError("location"));
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -66,18 +60,10 @@ export default function Form({ handleError, ...props }: FormProps) {
     })
       .then(async (res) => {
         if (res.status === 200) setOptions((await res.json()) ?? []);
-        else handleError("forecast");
+        else errorCtx.setError("forecast");
       })
-      .catch(() => handleError("unknown"));
+      .catch(() => errorCtx.setError("unknown"));
   }
-
-  const handleClose = (
-    _e: React.SyntheticEvent | Event,
-    reason?: SnackbarCloseReason
-  ) => {
-    if (reason === "clickaway") return;
-    toggleErrorSnackbar(false);
-  };
 
   return (
     <Box {...props} onSubmit={handleSubmit} component="form">
@@ -106,22 +92,6 @@ export default function Form({ handleError, ...props }: FormProps) {
           </MenuItem>
         ))}
       </Menu>
-      <Snackbar
-        open={showErrorSnackbar}
-        message="Autocomplete is currently unavailable"
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        onClose={handleClose}
-        action={
-          <IconButton
-            size="small"
-            aria-label="close"
-            color="inherit"
-            onClick={handleClose}
-          >
-            <Close fontSize="small" />
-          </IconButton>
-        }
-      />
     </Box>
   );
 }
