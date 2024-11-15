@@ -5,9 +5,7 @@ import {
   HttpStatus,
   Inject,
   Post,
-  UseInterceptors,
 } from '@nestjs/common';
-import { NoFilesInterceptor } from '@nestjs/platform-express';
 import { LocationService } from './location.service';
 import { CACHE_MANAGER, CacheKey } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -22,7 +20,6 @@ export class LocationController {
   ) {}
 
   @Post()
-  @UseInterceptors(NoFilesInterceptor())
   async findAll(@Body() body: { q?: string }): Promise<WeatherLocation[]> {
     if (!body.q) {
       throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);

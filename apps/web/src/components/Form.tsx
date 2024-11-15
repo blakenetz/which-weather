@@ -1,12 +1,18 @@
 import { Search } from "@mui/icons-material";
-import { OutlinedInput } from "@mui/material";
+import { Menu, MenuItem, OutlinedInput } from "@mui/material";
 import { debounce } from "lodash";
 import React from "react";
+import { WeatherLocation } from "@server/types";
 
 const url = new URL("location", import.meta.env.VITE_SERVER).toString();
 
-export default function Form() {
-  const ref = React.useRef<HTMLFormElement>(null);
+interface FormProps {
+  handleError: VoidFunction;
+}
+
+export default function Form({ handleError }: FormProps) {
+  const ref = React.useRef<HTMLInputElement>(null);
+  const [options, setOptions] = React.useState<WeatherLocation[]>([]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedOnChange = React.useCallback(debounce(fetchData, 500), []);
@@ -18,14 +24,17 @@ export default function Form() {
 
     try {
       const res = await fetch(url, {
-        method: "post",
+        method: "POST",
         body: JSON.stringify({ [name]: value }),
+        headers: { "Content-Type": "application/json" },
       });
+
       if (!res.ok) {
-        console.log(res.status, res.statusText);
+        // if (res.status === HttpStatus.SERVICE_UNAVAILABLE) handleError();
         return;
       }
-      const data = await res.json();
+
+      setOptions((await res.json()) ?? []);
     } catch (error) {
       console.log("error", error);
     }
@@ -37,8 +46,10 @@ export default function Form() {
   }
 
   return (
-    <form onSubmit={handleSubmit} ref={ref}>
+    <form onSubmit={handleSubmit}>
       <OutlinedInput
+        ref={ref}
+        id="search"
         name="q"
         placeholder="Search by Zip Code or City"
         aria-label="Search by zip code or city"
@@ -46,6 +57,19 @@ export default function Form() {
         startAdornment={<Search />}
         onChange={debouncedOnChange}
       />
+      <Menu
+        id="options-menu"
+        anchorEl={ref.current!}
+        open={Boolean(options.length)}
+        onClose={() => setOptions([])}
+        MenuListProps={{
+          "aria-labelledby": "search",
+        }}
+      >
+        {options.map((o) => (
+          <MenuItem key={o.lat + o.lon}>{o.name}</MenuItem>
+        ))}
+      </Menu>
     </form>
   );
 }
