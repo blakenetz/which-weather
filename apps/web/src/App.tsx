@@ -1,8 +1,9 @@
 import { Container, SxProps, Theme } from "@mui/material";
 import Form from "./components/Form";
 import Forecast from "./components/Forecast";
-import React from "react";
 import Error from "./components/Error";
+import { Endpoints } from "@server/types";
+import React from "react";
 
 const containerSx: SxProps = {
   display: "flex",
@@ -21,13 +22,15 @@ const formSx: SxProps<Theme> = ({ breakpoints }) => ({
 });
 
 export default function App() {
-  const [error, showError] = React.useState(true);
+  const [_error, setError] = React.useState<
+    Endpoints | "unknown" | undefined
+  >();
 
   return (
     <Container maxWidth="xl" sx={containerSx}>
-      {error && <Error handleClose={() => showError(false)} />}
+      <Error handleClose={() => setError(undefined)} />
 
-      <Form handleError={() => showError(true)} sx={formSx} />
+      <Form handleError={setError} sx={formSx} />
       <Forecast />
     </Container>
   );
