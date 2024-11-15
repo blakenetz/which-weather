@@ -1,16 +1,16 @@
 import { Search } from "@mui/icons-material";
-import { Menu, MenuItem, OutlinedInput } from "@mui/material";
+import { Box, BoxProps, Menu, MenuItem, OutlinedInput } from "@mui/material";
 import { debounce } from "lodash";
 import React from "react";
 import { WeatherLocation } from "@server/types";
 
 const url = new URL("location", import.meta.env.VITE_SERVER).toString();
 
-interface FormProps {
+interface FormProps extends BoxProps<"form"> {
   handleError: VoidFunction;
 }
 
-export default function Form({ handleError }: FormProps) {
+export default function Form({ handleError, ...props }: FormProps) {
   const ref = React.useRef<HTMLInputElement>(null);
   const [options, setOptions] = React.useState<WeatherLocation[]>([]);
 
@@ -30,7 +30,7 @@ export default function Form({ handleError }: FormProps) {
       });
 
       if (!res.ok) {
-        // if (res.status === HttpStatus.SERVICE_UNAVAILABLE) handleError();
+        if (res.status === 522) handleError();
         return;
       }
 
@@ -46,7 +46,7 @@ export default function Form({ handleError }: FormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <Box {...props} onSubmit={handleSubmit} component="form">
       <OutlinedInput
         ref={ref}
         id="search"
@@ -56,6 +56,7 @@ export default function Form({ handleError }: FormProps) {
         autoFocus
         startAdornment={<Search />}
         onChange={debouncedOnChange}
+        fullWidth
       />
       <Menu
         id="options-menu"
@@ -70,6 +71,6 @@ export default function Form({ handleError }: FormProps) {
           <MenuItem key={o.lat + o.lon}>{o.name}</MenuItem>
         ))}
       </Menu>
-    </form>
+    </Box>
   );
 }
