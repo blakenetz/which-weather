@@ -7,13 +7,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { LocationService } from './location.service';
-import { CACHE_MANAGER, CacheKey } from '@nestjs/cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { WeatherLocation } from '@server/types';
 import { AppService } from '@server/app.service';
 
 @Controller('location')
-@CacheKey('location')
 export class LocationController {
   constructor(
     private readonly locationService: LocationService,
@@ -34,7 +33,7 @@ export class LocationController {
 
     const locations = await this.locationService.getLocations(body.q);
     if (locations) {
-      this.cacheManager.set(body.q, locations);
+      this.appService.setCache(body.q, locations);
       return locations;
     }
 

@@ -13,17 +13,11 @@ const StyledContainer = styled(Container)({
   minHeight: "100dvh",
 });
 
-const StyledForm = styled(Form)(({ theme }) => ({
-  marginTop: "15dvh",
-  width: "100%",
-  maxWidth: theme.breakpoints.values["sm"],
-}));
-
 export default function App() {
   return (
     <ErrorProvider>
       <StyledContainer maxWidth="xl">
-        <StyledForm />
+        <Form />
         <Forecast />
       </StyledContainer>
     </ErrorProvider>

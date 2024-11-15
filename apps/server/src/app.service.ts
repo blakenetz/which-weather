@@ -14,4 +14,8 @@ export class AppService {
     }
     return null;
   }
+
+  async setCache<T = unknown>(key: string, data: T) {
+    this.cacheManager.set(key, data);
+  }
 }
