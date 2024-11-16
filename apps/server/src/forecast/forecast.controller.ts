@@ -4,6 +4,7 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Res,
   UseInterceptors,
@@ -27,13 +28,48 @@ export class ForecastController {
     private readonly appService: AppService,
   ) {}
 
+  @Post(':client')
+  @UseInterceptors(NoFilesInterceptor())
+  async find(
+    @Body() body: ForecastFormBody,
+    @Param() params: { client: ForecastClient },
+  ): Promise<Forecast[] | null> {
+    // artificial delay
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    const empty = !Object.keys(body).every(Boolean);
+    if (empty) {
+      throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    if (body.key) {
+      const cacheKey = [body.key, params.client].join('-');
+      const cached = await this.appService.fetchFromCache<Forecast[]>(cacheKey);
+      if (cached) return cached;
+
+      const data = await this.forecastService.fetchFromClient(
+        params.client,
+        body,
+      );
+
+      if (data) {
+        this.appService.setCache(cacheKey, data);
+        return data;
+      }
+
+      throw new HttpException('Client Error', HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  // todo make this work
   @Post()
   @UseInterceptors(NoFilesInterceptor())
   async findAll(
     @Body() body: ForecastFormBody,
     @Res() response: Response,
   ): Promise<Forecast[]> {
-    console.log(body);
     const empty = !Object.keys(body).every(Boolean);
     if (empty) {
       throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);

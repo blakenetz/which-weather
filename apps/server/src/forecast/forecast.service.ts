@@ -7,6 +7,7 @@ import {
   Forecast,
   WeatherDotGovForecastResponse,
   AccuweatherForecastResponse,
+  ForecastClient,
 } from '@server/types';
 import {
   accuWeatherData,
@@ -20,9 +21,25 @@ type ClientURL = [url: URL | string, base?: URL | string];
 type ClientSearch = Record<string, string>;
 type Formatter<T, R = Forecast[]> = (data: T) => R;
 
+type ForecastReturn = Promise<Forecast[] | null>;
+
 @Injectable()
 export class ForecastService {
   constructor(private readonly httpService: HttpService) {}
+
+  async fetchFromClient(
+    client: ForecastClient,
+    params: ForecastFormBody,
+  ): ForecastReturn {
+    switch (client) {
+      case 'accuWeather':
+        return this.fetchAccuWeather(params);
+      case 'openWeather':
+        return this.fetchOpenWeather(params);
+      case 'weatherDotGov':
+        return this.fetchWeatherDotGov(params);
+    }
+  }
 
   async fetchFromService<T, R = Forecast[]>(
     [url, base]: ClientURL,
@@ -46,9 +63,7 @@ export class ForecastService {
     );
   }
 
-  async fetchWeatherDotGov(
-    params: ForecastFormBody,
-  ): Promise<Forecast[] | null> {
+  async fetchWeatherDotGov(params: ForecastFormBody): ForecastReturn {
     type R = WeatherDotGovPointsResponse;
     type RR = WeatherDotGovForecastResponse;
 
@@ -77,7 +92,7 @@ export class ForecastService {
     return this.fetchFromService<RR>([foreCastUrl], {}, formatter);
   }
 
-  async fetchOpenWeather(params: ForecastFormBody): Promise<Forecast[] | null> {
+  async fetchOpenWeather(params: ForecastFormBody): ForecastReturn {
     type R = OpenWeatherForecastResponse;
 
     const url = 'https://api.openweathermap.org/data/2.5/forecast';
@@ -94,7 +109,7 @@ export class ForecastService {
         temperature: [item.main.temp_min, item.main.temp_max],
         feelsLike: item.main.feels_like,
         wind: `${item.wind.speed}mph @ ${item.wind.deg}°`,
-        icon: item.weather[0].icon,
+        icon: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`,
         description: item.weather[0].description,
       }));
     };
@@ -106,7 +121,7 @@ export class ForecastService {
     return this.fetchFromService<R>([url], search, formatter);
   }
 
-  async fetchAccuWeather(params: ForecastFormBody): Promise<Forecast[] | null> {
+  async fetchAccuWeather(params: ForecastFormBody): ForecastReturn {
     type R = AccuweatherForecastResponse;
 
     const base = 'http://dataservice.accuweather.com/forecasts/v1/daily/5day/';

@@ -26,6 +26,11 @@ export default function Form(props: BoxProps<"form">) {
   const [options, setOptions] = React.useState<WeatherLocation[]>([]);
   const [selected, setSelected] = React.useState<WeatherLocation | null>(null);
 
+  // since `setSelected` is async, this guarantees submit is called after `selected` updates
+  React.useEffect(() => {
+    if (selected) formRef.current?.requestSubmit();
+  }, [selected]);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedOnChange = React.useCallback(debounce(fetchData, 500), []);
 
@@ -61,9 +66,9 @@ export default function Form(props: BoxProps<"form">) {
     forecastCtx.initializeDataFetch(formData);
   };
 
-  const handleClick = (value: WeatherLocation) => {
-    setSelected(value);
-    formRef.current?.requestSubmit();
+  const handleClick = (option: WeatherLocation) => {
+    setOptions([]);
+    setSelected(option);
   };
 
   return (
