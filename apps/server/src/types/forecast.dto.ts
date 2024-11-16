@@ -11,7 +11,7 @@ export class Forecast {
 }
 
 export class ForecastResponseBody {
-  type: 'success' | 'error';
+  type: 'chunk' | 'error' | 'success';
   message?: string;
   data: Forecast[] | null;
   client?: ForecastClient;

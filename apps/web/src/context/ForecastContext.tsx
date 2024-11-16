@@ -1,10 +1,7 @@
 import React from "react";
 
 type ForecastContextType = {
-  initialize: (v: FormData) => void;
-  fetchData: () => Promise<ReadableStreamDefaultReader<Uint8Array> | undefined>;
-  ready: boolean;
+  body?: FormData;
+  initializeDataFetch: (d: FormData) => void;
 };
-export const ForecastContext = React.createContext({
-  ready: false,
-} as ForecastContextType);
+export const ForecastContext = React.createContext({} as ForecastContextType);

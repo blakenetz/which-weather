@@ -78,13 +78,13 @@ export class ForecastController {
               completed.add(client);
 
               const responseBody: ForecastResponseBody = {
-                type: 'success',
+                type: 'chunk',
                 client,
                 data,
                 progress,
               };
 
-              response.write(JSON.stringify(responseBody));
+              response.write(JSON.stringify(responseBody) + '\n\n');
             }
             // return data
             return data;
@@ -100,7 +100,7 @@ export class ForecastController {
                 progress,
               };
 
-              response.write(JSON.stringify(responseBody));
+              response.write(JSON.stringify(responseBody) + '\n\n');
             }
           }
         }),
@@ -112,9 +112,18 @@ export class ForecastController {
           progress: 100,
         };
 
-        response.write(JSON.stringify(responseBody));
+        response.write(JSON.stringify(responseBody) + '\n\n');
         response.end();
       });
+
+      const responseBody: ForecastResponseBody = {
+        type: 'success',
+        data: null,
+        progress: 100,
+      };
+
+      response.write(JSON.stringify(responseBody) + '\n\n');
+      response.end();
     }
     // check query
     if (body.q) {

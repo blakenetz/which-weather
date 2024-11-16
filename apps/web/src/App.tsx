@@ -2,6 +2,7 @@ import { Container, styled } from "@mui/material";
 import Form from "./components/Form";
 import Forecast from "./components/Forecast";
 import ErrorProvider from "./context/ErrorProvider";
+import ForecastProvider from "./context/ForecastProvider";
 
 const StyledContainer = styled(Container)({
   display: "flex",
@@ -16,10 +17,12 @@ const StyledContainer = styled(Container)({
 export default function App() {
   return (
     <ErrorProvider>
-      <StyledContainer maxWidth="xl">
-        <Form />
-        <Forecast />
-      </StyledContainer>
+      <ForecastProvider>
+        <StyledContainer maxWidth="xl">
+          <Form />
+          <Forecast />
+        </StyledContainer>
+      </ForecastProvider>
     </ErrorProvider>
   );
 }

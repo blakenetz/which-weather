@@ -58,7 +58,7 @@ export default function Form(props: BoxProps<"form">) {
       formData.append("key", selected?.key);
     }
 
-    forecastCtx.initialize(formData);
+    forecastCtx.initializeDataFetch(formData);
   };
 
   const handleClick = (value: WeatherLocation) => {
