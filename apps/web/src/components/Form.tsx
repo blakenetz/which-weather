@@ -84,7 +84,7 @@ export default function Form(props: BoxProps<"form">) {
         maxWidth: breakpoints.values["sm"],
       })}
     >
-      <ThemeProvider defaultMode="dark" theme={darkTheme}>
+      <ThemeProvider theme={darkTheme}>
         <OutlinedInput
           ref={inputRef}
           id="search"

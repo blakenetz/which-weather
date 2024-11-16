@@ -19,12 +19,14 @@ import {
 import { ForecastService } from './forecast.service';
 import { AppService } from '@server/app.service';
 import { Response } from 'express';
+import { LocationService } from '@server/location/location.service';
 
 @Controller('forecast')
 @CacheKey('forecast')
 export class ForecastController {
   constructor(
     private readonly forecastService: ForecastService,
+    private readonly locationService: LocationService,
     private readonly appService: AppService,
   ) {}
 
@@ -51,6 +53,29 @@ export class ForecastController {
         params.client,
         body,
       );
+
+      if (data) {
+        this.appService.setCache(cacheKey, data);
+        return data;
+      }
+
+      throw new HttpException('Client Error', HttpStatus.SERVICE_UNAVAILABLE);
+    } else if (body.q) {
+      const cacheKey = [body.q, params.client].join('-');
+      const cached = await this.appService.fetchFromCache<Forecast[]>(cacheKey);
+      if (cached) return cached;
+
+      const locations = await this.locationService.getLocations(body.q);
+      if (!locations) {
+        throw new HttpException('Client Error', HttpStatus.SERVICE_UNAVAILABLE);
+      }
+
+      // pluck off first location match
+      const data = await this.forecastService.fetchFromClient(params.client, {
+        lat: locations[0].lat.toString(),
+        long: locations[0].long.toString(),
+        key: locations[0].key,
+      });
 
       if (data) {
         this.appService.setCache(cacheKey, data);
