@@ -1,14 +1,20 @@
+import { Air, Thermostat } from "@mui/icons-material";
 import {
   Button,
   Card as MuiCard,
   CardActions,
   CardContent,
   Typography,
+  CardHeader,
+  Avatar,
   Stack,
+  styled,
   Box,
+  svgIconClasses,
 } from "@mui/material";
 import { Forecast } from "@server/types";
 import { format, isToday, isTomorrow } from "date-fns";
+import { startCase } from "lodash";
 
 interface CardProps {
   data: Forecast;
@@ -23,43 +29,90 @@ function formatDate(date: string) {
     formatString = "'Tomorrow'";
   }
 
-  return format(date, `${formatString} 'at' h:mm aaaa`);
+  return format(date, `${formatString} 'at' h:mm aaa`);
 }
+
+function isAfternoon(date: string) {
+  return format(date, "a") === "PM";
+}
+
+function Temperature({
+  type,
+  temp,
+}: {
+  type?: "high" | "low" | "feelsLike";
+  temp: number;
+}) {
+  return (
+    <Typography variant="body2">
+      {`${startCase(type ?? "temp")}: `}
+      <Typography
+        variant="body2"
+        sx={{ color: "text.secondary" }}
+        component="span"
+      >
+        {temp}°F
+      </Typography>
+    </Typography>
+  );
+}
+
+const Section = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  [`.${svgIconClasses.root}`]: {
+    height: theme.typography.body2.fontSize,
+    width: "auto",
+  },
+}));
 
 export default function Card({ data }: CardProps) {
   const date = formatDate(data.time);
+  const isDark = isAfternoon(data.time);
 
   return (
-    <MuiCard sx={{ minWidth: 300 }}>
+    <MuiCard raised sx={{ minWidth: 300 }}>
+      <CardHeader
+        title={date}
+        avatar={data.icon && <Avatar src={data.icon} />}
+        sx={{
+          alignItems: "flex-start",
+          bgcolor: isDark ? "grey.900" : "primary.light",
+          color: isDark ? "primary.contrastText" : "text.primary",
+        }}
+      />
+
       <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Stack direction="row">
-          {data.icon && (
-            <Box
-              component="img"
-              src={data.icon}
-              sx={({ typography }) => ({
-                height: `calc(${typography.subtitle1.fontSize} * 2)`,
-              })}
-            />
-          )}
-          <Typography variant="subtitle2">{date}</Typography>
-        </Stack>
-        <div>
-          {Array.isArray(data.temperature) ? (
-            <div>
-              <Typography>High: {data.temperature[0]}°F</Typography>
-              <Typography>Low: {data.temperature[1]}°F</Typography>
-            </div>
-          ) : (
-            <Typography>Temp: {data.temperature}°F</Typography>
-          )}
-          {data.feelsLike && (
-            <Typography>Feels like: {data.feelsLike}°F</Typography>
-          )}
-        </div>
-        {data.description && <Typography>{data.description}</Typography>}
-        {data.wind && <Typography>{data.wind}</Typography>}
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          {data.description}
+        </Typography>
+        <Section>
+          <Thermostat />
+          <Stack>
+            {Array.isArray(data.temperature) ? (
+              <div>
+                <Temperature type="high" temp={data.temperature[0]} />
+                <Temperature type="low" temp={data.temperature[1]} />
+              </div>
+            ) : (
+              <Temperature temp={data.temperature} />
+            )}
+            {data.feelsLike && (
+              <Temperature type="feelsLike" temp={data.feelsLike} />
+            )}
+          </Stack>
+        </Section>
+
+        {data.wind && (
+          <Section>
+            <Air />
+            <Typography>{data.wind}</Typography>
+          </Section>
+        )}
       </CardContent>
+
       {data.link && (
         <CardActions sx={{ justifyContent: "flex-end" }}>
           <Button size="small" component="a" href={data.link} target="_blank">

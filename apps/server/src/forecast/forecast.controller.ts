@@ -109,7 +109,7 @@ export class ForecastController {
           try {
             // resolve the promise
             const data = await promise;
-            console.log(client, data);
+
             if (incomplete) {
               completed.add(client);
 

@@ -6,6 +6,7 @@ import {
   menuClasses,
   MenuItem,
   OutlinedInput,
+  ThemeProvider,
   Typography,
 } from "@mui/material";
 import { debounce } from "lodash";
@@ -13,6 +14,7 @@ import React from "react";
 import { WeatherLocation } from "@server/types";
 import { ErrorContext } from "@web/context/ErrorContext";
 import { ForecastContext } from "@web/context/ForecastContext";
+import { darkTheme } from "@web/theme";
 
 const locationURL = new URL("location", import.meta.env.VITE_SERVER).toString();
 
@@ -78,22 +80,23 @@ export default function Form(props: BoxProps<"form">) {
       component="form"
       ref={formRef}
       sx={({ breakpoints }) => ({
-        marginTop: "15dvh",
         width: "100%",
         maxWidth: breakpoints.values["sm"],
       })}
     >
-      <OutlinedInput
-        ref={inputRef}
-        id="search"
-        name="q"
-        placeholder="Search by Zip Code or City"
-        aria-label="Search by zip code or city"
-        autoFocus
-        startAdornment={<Search />}
-        onChange={debouncedOnChange}
-        fullWidth
-      />
+      <ThemeProvider defaultMode="dark" theme={darkTheme}>
+        <OutlinedInput
+          ref={inputRef}
+          id="search"
+          name="q"
+          placeholder="Search by Zip Code or City"
+          aria-label="Search by zip code or city"
+          autoFocus
+          startAdornment={<Search />}
+          onChange={debouncedOnChange}
+          fullWidth
+        />
+      </ThemeProvider>
 
       <Menu
         id="options-menu"

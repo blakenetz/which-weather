@@ -73,7 +73,7 @@ export class LocationService {
         map((res) => this.formatResponse(res.data)),
         catchError((error: AxiosError) => {
           // todo: implement logger
-          console.log('axios error!', error.response?.data);
+          console.log('error!', error.response?.data);
 
           return of(null);
         }),
