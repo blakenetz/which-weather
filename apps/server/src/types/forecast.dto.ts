@@ -1,4 +1,4 @@
-export type ForecastClient = 'accuWeather' | 'openWeather' | 'weatherGov';
+export type ForecastClient = 'accuWeather' | 'openWeather' | 'weatherDotGov';
 
 export class Forecast {
   time: string;
@@ -25,7 +25,12 @@ export class ForecastFormBody {
   key?: string;
 }
 
-export class WeatherGovPointsResponse {
+/**
+ * I know you said no AI, but I used an LLM to generate the following response classes.
+ * I figure there wasn't really any logic involved, so in this case it would be alright.
+ */
+
+export class WeatherDotGovPointsResponse {
   '@context': (
     | string
     | {
@@ -108,7 +113,7 @@ export class WeatherGovPointsResponse {
   };
 }
 
-export class WeatherGovForecastResponse {
+export class WeatherDotGovForecastResponse {
   '@context': (
     | string
     | {

@@ -1,6 +1,6 @@
 import { AccuweatherForecastResponse } from '@server/types';
 
-export const accuweatherData: AccuweatherForecastResponse = {
+export const accuWeatherData: AccuweatherForecastResponse = {
   Headline: {
     EffectiveDate: '2024-11-16T07:00:00-07:00',
     EffectiveEpochDate: 1731765600,

@@ -2,12 +2,17 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import {
   OpenWeatherForecastResponse,
-  WeatherGovPointsResponse,
+  WeatherDotGovPointsResponse,
   ForecastFormBody,
   Forecast,
-  WeatherGovForecastResponse,
+  WeatherDotGovForecastResponse,
   AccuweatherForecastResponse,
 } from '@server/types';
+import {
+  accuWeatherData,
+  openWeatherData,
+  weatherDotGovData,
+} from '@test/data';
 import { AxiosError } from 'axios';
 import { firstValueFrom, catchError, of, map } from 'rxjs';
 
@@ -41,17 +46,11 @@ export class ForecastService {
     );
   }
 
-  async fetchWeatherGov(params: ForecastFormBody): Promise<Forecast[] | null> {
-    type R = WeatherGovPointsResponse;
-    type RR = WeatherGovForecastResponse;
-
-    const foreCastUrl = await this.fetchFromService<R, string>(
-      [`${params.lat},${params.long}`, 'https://api.weather.gov/points'],
-      {},
-      (data) => data.properties.forecast,
-    );
-
-    if (!foreCastUrl) return null;
+  async fetchWeatherDotGov(
+    params: ForecastFormBody,
+  ): Promise<Forecast[] | null> {
+    type R = WeatherDotGovPointsResponse;
+    type RR = WeatherDotGovForecastResponse;
 
     const formatter: Formatter<RR> = (data) => {
       return data.properties.periods.map((item) => ({
@@ -63,13 +62,23 @@ export class ForecastService {
       }));
     };
 
+    if (process.env.NODE_ENV === 'development') {
+      return formatter(weatherDotGovData);
+    }
+
+    const foreCastUrl = await this.fetchFromService<R, string>(
+      [`${params.lat},${params.long}`, 'https://api.weather.gov/points'],
+      {},
+      (data) => data.properties.forecast,
+    );
+
+    if (!foreCastUrl) return null;
+
     return this.fetchFromService<RR>([foreCastUrl], {}, formatter);
   }
 
   async fetchOpenWeather(params: ForecastFormBody): Promise<Forecast[] | null> {
     type R = OpenWeatherForecastResponse;
-
-    console.log('openWeather');
 
     const url = 'https://api.openweathermap.org/data/2.5/forecast';
     const search = {
@@ -89,6 +98,10 @@ export class ForecastService {
         description: item.weather[0].description,
       }));
     };
+
+    if (process.env.NODE_ENV === 'development') {
+      return formatter(openWeatherData);
+    }
 
     return this.fetchFromService<R>([url], search, formatter);
   }
@@ -114,6 +127,10 @@ export class ForecastService {
         link: item.Link,
       }));
     };
+
+    if (process.env.NODE_ENV === 'development') {
+      return formatter(accuWeatherData);
+    }
 
     return this.fetchFromService<R>(
       [params.key!, base],

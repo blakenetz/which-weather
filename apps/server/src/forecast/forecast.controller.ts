@@ -57,7 +57,7 @@ export class ForecastController {
       const promises: Record<ForecastClient, Promise<Forecast[] | null>> = {
         accuWeather: this.forecastService.fetchAccuWeather(body),
         openWeather: this.forecastService.fetchOpenWeather(body),
-        weatherGov: this.forecastService.fetchWeatherGov(body),
+        weatherDotGov: this.forecastService.fetchWeatherDotGov(body),
       };
 
       const completed = new Set<string>();
