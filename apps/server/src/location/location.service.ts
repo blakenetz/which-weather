@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { AccuWeatherResponseItem, WeatherLocation } from '@server/types';
+import { locationData } from '@test/data';
 import { AxiosError } from 'axios';
 import { firstValueFrom, catchError, of, map } from 'rxjs';
 
@@ -63,6 +64,8 @@ export class LocationService {
   }
 
   async getLocations(q: string): Promise<WeatherLocation[] | null> {
+    if (process.env.NODE_ENV === 'development') return locationData;
+
     const url = this.client.generateUrl(q);
 
     const data = await firstValueFrom(
