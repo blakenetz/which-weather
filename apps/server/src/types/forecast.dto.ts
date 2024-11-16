@@ -1,4 +1,4 @@
-export type ForecastClient = 'accuweather' | 'openweather' | 'weathergov';
+export type ForecastClient = 'accuWeather' | 'openWeather' | 'weatherGov';
 
 export class Forecast {
   time: string;
@@ -187,11 +187,10 @@ export class OpenWeatherForecastResponse {
       deg: number;
       gust: number;
     };
-    visibility: number;
+    visibility?: number;
     pop: number;
-    rain?: {
-      '3h': number;
-    };
+    rain?: { '3h': number };
+    snow?: { '3h': number };
     sys: {
       pod: string;
     };

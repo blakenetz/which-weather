@@ -33,6 +33,7 @@ export class ForecastController {
     @Body() body: ForecastFormBody,
     @Res() response: Response,
   ): Promise<Forecast[]> {
+    console.log(body);
     const empty = !Object.keys(body).every(Boolean);
     if (empty) {
       throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
@@ -53,13 +54,13 @@ export class ForecastController {
 
     // fetch by location data
     if (body.key && body.lat && body.long) {
-      const completed = new Set<string>();
-
       const promises: Record<ForecastClient, Promise<Forecast[] | null>> = {
-        accuweather: this.forecastService.fetchAccuWeather(body),
-        openweather: this.forecastService.fetchOpenWeather(body),
-        weathergov: this.forecastService.fetchWeatherGov(body),
+        accuWeather: this.forecastService.fetchAccuWeather(body),
+        openWeather: this.forecastService.fetchOpenWeather(body),
+        weatherGov: this.forecastService.fetchWeatherGov(body),
       };
+
+      const completed = new Set<string>();
 
       await Promise.allSettled(
         Object.entries(promises).map(async ([forecastClient, promise]) => {
@@ -72,6 +73,7 @@ export class ForecastController {
           try {
             // resolve the promise
             const data = await promise;
+            console.log(client, data);
             if (incomplete) {
               completed.add(client);
 
@@ -118,7 +120,9 @@ export class ForecastController {
     if (body.q) {
     }
 
-    throw new HttpException('Client Error', HttpStatus.SERVICE_UNAVAILABLE);
-    // throw new HttpException('Unable to process results', HttpStatus.SERVICE_UNAVAILABLE);
+    throw new HttpException(
+      'Unable to process results',
+      HttpStatus.SERVICE_UNAVAILABLE,
+    );
   }
 }

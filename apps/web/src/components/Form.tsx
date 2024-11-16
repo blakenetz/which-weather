@@ -12,12 +12,13 @@ import { debounce } from "lodash";
 import React from "react";
 import { WeatherLocation } from "@server/types";
 import { ErrorContext } from "@web/context/ErrorContext";
+import { ForecastContext } from "@web/context/ForecastContext";
 
 const locationURL = new URL("location", import.meta.env.VITE_SERVER).toString();
-const forecastURL = new URL("forecast", import.meta.env.VITE_SERVER).toString();
 
 export default function Form(props: BoxProps<"form">) {
   const errorCtx = React.useContext(ErrorContext);
+  const forecastCtx = React.useContext(ForecastContext);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const formRef = React.useRef<HTMLFormElement>(null);
@@ -57,15 +58,7 @@ export default function Form(props: BoxProps<"form">) {
       formData.append("key", selected?.key);
     }
 
-    fetch(forecastURL, {
-      method: "POST",
-      body: formData,
-    })
-      .then(async (res) => {
-        if (res.status === 200) setOptions((await res.json()) ?? []);
-        else errorCtx.setError("forecast");
-      })
-      .catch(() => errorCtx.setError("unknown"));
+    forecastCtx.initialize(formData);
   };
 
   const handleClick = (value: WeatherLocation) => {

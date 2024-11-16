@@ -27,12 +27,14 @@ export class ForecastService {
     const endpoint = new URL(url, base);
     endpoint.search = new URLSearchParams(search).toString();
 
+    console.log('fetching', endpoint.toString());
+
     return firstValueFrom(
       this.httpService.get<T>(endpoint.toString()).pipe(
         map((res) => formatter(res.data)),
         catchError((error: AxiosError) => {
           // todo: implement logger
-          console.log('axios error!', error.response?.data);
+          console.log('error!', error.response?.data);
           return of(null);
         }),
       ),
@@ -44,7 +46,7 @@ export class ForecastService {
     type RR = WeatherGovForecastResponse;
 
     const foreCastUrl = await this.fetchFromService<R, string>(
-      [`points/${params.lat}/${params.long}`, 'https://api.weather.gov'],
+      [`${params.lat},${params.long}`, 'https://api.weather.gov/points'],
       {},
       (data) => data.properties.forecast,
     );
@@ -67,7 +69,9 @@ export class ForecastService {
   async fetchOpenWeather(params: ForecastFormBody): Promise<Forecast[] | null> {
     type R = OpenWeatherForecastResponse;
 
-    const url = 'api.openweathermap.org/data/2.5/forecast';
+    console.log('openWeather');
+
+    const url = 'https://api.openweathermap.org/data/2.5/forecast';
     const search = {
       lat: params.lat!,
       lon: params.long!,
@@ -92,7 +96,7 @@ export class ForecastService {
   async fetchAccuWeather(params: ForecastFormBody): Promise<Forecast[] | null> {
     type R = AccuweatherForecastResponse;
 
-    const base = 'http://dataservice.accuweather.com/forecasts/v1/daily/5day';
+    const base = 'http://dataservice.accuweather.com/forecasts/v1/daily/5day/';
 
     const numberFormatter = new Intl.NumberFormat('en-US', {
       minimumIntegerDigits: 2,

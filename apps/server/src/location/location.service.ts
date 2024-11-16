@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { AccuWeatherResponseItem, WeatherLocation } from '@server/types';
-import { locationData } from '@test/data';
+import { locationData } from '@test/data/location';
 import { AxiosError } from 'axios';
 import { firstValueFrom, catchError, of, map } from 'rxjs';
 
@@ -10,7 +10,7 @@ type LocationClientURLComponents = {
   search: Record<string, string>;
 };
 
-type LocationClientType = 'accuweather' | 'openweather';
+type LocationClientType = 'accuWeather' | 'openWeather';
 class LocationClient {
   type: LocationClientType;
   client: LocationClientURLComponents;
@@ -21,11 +21,11 @@ class LocationClient {
   }
 
   private clients: Record<LocationClientType, LocationClientURLComponents> = {
-    accuweather: {
+    accuWeather: {
       url: 'http://dataservice.accuweather.com/locations/v1/cities/search',
       search: { q: '', limit: '5', apikey: process.env.ACCUWEATHER_KEY! },
     },
-    openweather: {
+    openWeather: {
       url: 'http://api.openweathermap.org/geo/1.0/direct',
       search: { q: '', limit: '5', appid: process.env.OPEN_WEATHER_KEY! },
     },
@@ -48,10 +48,10 @@ export class LocationService {
   client: LocationClient;
 
   constructor(private readonly httpService: HttpService) {
-    this.client = new LocationClient('accuweather');
+    this.client = new LocationClient('accuWeather');
   }
 
-  // todo uncouple from accuweather
+  // todo uncouple from accuWeather
   private formatResponse(data: AccuWeatherResponseItem[]): WeatherLocation[] {
     return data.map((d) => ({
       key: d.Key,
