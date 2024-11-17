@@ -116,9 +116,12 @@ export class ForecastController {
     // fetch by location data
     if (body.key && body.lat && body.long) {
       const promises: Record<ForecastClient, Promise<Forecast[] | null>> = {
-        accuWeather: this.forecastService.fetchAccuWeather(body),
-        openWeather: this.forecastService.fetchOpenWeather(body),
-        weatherDotGov: this.forecastService.fetchWeatherDotGov(body),
+        accuWeather: this.forecastService.fetchFromClient('accuWeather', body),
+        openWeather: this.forecastService.fetchFromClient('openWeather', body),
+        weatherDotGov: this.forecastService.fetchFromClient(
+          'weatherDotGov',
+          body,
+        ),
       };
 
       const completed = new Set<string>();
