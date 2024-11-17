@@ -1,32 +1,26 @@
+import { Alert, Skeleton, Stack, Typography } from "@mui/material";
 import { Forecast, ForecastClient } from "@server/types";
 import { ForecastContext } from "@web/context/ForecastContext";
-import React, { Suspense } from "react";
-
-import use from "@web/hooks/use";
-import { ErrorContext, ErrorContextType } from "@web/context/ErrorContext";
-import { Skeleton, Stack, Typography } from "@mui/material";
-import Card from "./Card";
+import use, { ReadResults } from "@web/hooks/use";
 import { startCase } from "lodash";
+import React, { Suspense } from "react";
+import Card from "./Card";
 
 interface ForecastGridProps {
   client: ForecastClient;
 }
 
 interface ForecastGridItemProps extends ForecastGridProps {
-  data: { read: () => Forecast[] };
+  reader: { read: () => ReadResults<Forecast[]> };
 }
 
-function fetchData(
-  url: URL,
-  body: FormData,
-  handleError: ErrorContextType["setError"]
-) {
-  return fetch(url.toString(), { method: "POST", body })
-    .then((res) => {
-      if (res.ok) return res.json();
-      handleError("forecast");
-    })
-    .catch(() => handleError("unknown"));
+function fetchData(client: ForecastClient, body: FormData) {
+  const url = new URL(`forecast/${client}`, import.meta.env.VITE_SERVER);
+
+  return fetch(url.toString(), { method: "POST", body }).then(async (res) => {
+    if (res.ok) return res.json();
+    throw new Error(`Temporarily unavailable. Please try again later.`);
+  });
 }
 
 function Fallback() {
@@ -39,8 +33,9 @@ function Fallback() {
   );
 }
 
-function ForecastGridItem({ data, client }: ForecastGridItemProps) {
-  const forecastData = data.read();
+function ForecastGridItem({ reader, client }: ForecastGridItemProps) {
+  const { data, error } = reader.read();
+
   let title = startCase(client).replace(/\s/g, "");
   if (client === "weatherDotGov") title = title.replace(/Dot/, ".");
 
@@ -51,9 +46,11 @@ function ForecastGridItem({ data, client }: ForecastGridItemProps) {
       </Typography>
 
       <Stack direction="row" gap={2} sx={{ pb: 3, overflow: "scroll" }}>
-        {forecastData.map((data) => (
-          <Card data={data} key={data.time + client} />
-        ))}
+        {error?.message ? (
+          <Alert severity="error">{error.message}</Alert>
+        ) : (
+          data.map((item) => <Card data={item} key={item.time + client} />)
+        )}
       </Stack>
     </section>
   );
@@ -61,21 +58,13 @@ function ForecastGridItem({ data, client }: ForecastGridItemProps) {
 
 export default function ForecastGrid({ client }: ForecastGridProps) {
   const { body } = React.useContext(ForecastContext);
-  const errorCtx = React.useContext(ErrorContext);
-
   if (!body) return null;
 
-  const forecastURL = new URL(
-    `forecast/${client}`,
-    import.meta.env.VITE_SERVER
-  );
-
-  const promise = fetchData(forecastURL, body, errorCtx.setError);
-  const data = use<Forecast[]>(promise);
+  const reader = use<Forecast[]>(fetchData(client, body));
 
   return (
-    <Suspense fallback={<Fallback />}>
-      <ForecastGridItem data={data} client={client} />
+    <Suspense fallback={<Fallback />} name={client}>
+      <ForecastGridItem reader={reader} client={client} />
     </Suspense>
   );
 }

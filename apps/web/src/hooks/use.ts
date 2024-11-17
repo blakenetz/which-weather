@@ -2,6 +2,9 @@
  * Following patterns used in React docs
  */
 type PromiseStatus = "pending" | "fulfilled" | "rejected";
+
+export type ReadResults<T> = { data: T; error?: Error };
+
 export default function use<T>(promise: Promise<T>) {
   let status: PromiseStatus = "pending";
   let result: T;
@@ -19,16 +22,16 @@ export default function use<T>(promise: Promise<T>) {
   );
 
   return {
-    read(): T {
+    read(): ReadResults<T> {
       switch (status) {
         case "pending":
           throw suspender;
 
         case "rejected":
-          throw error;
+          return { error, data: [] as T };
 
         case "fulfilled":
-          return result;
+          return { data: result };
 
         default:
           throw new Error("Unexpected status");
