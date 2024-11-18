@@ -9,7 +9,6 @@ type _ClientService = ClientService<object, object, object>;
 
 describe('ClientService', () => {
   let service: DeepMocked<_ClientService>;
-  let httpService: DeepMocked<HttpService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,12 +19,10 @@ describe('ClientService', () => {
     }).compile();
 
     service = module.get(ClientService);
-    httpService = module.get(ClientService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-    expect(httpService).toBeDefined();
   });
 
   describe('url', () => {

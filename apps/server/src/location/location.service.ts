@@ -80,8 +80,6 @@ export class LocationService {
   async getLocations(
     params: LocationFormBody,
   ): Promise<WeatherLocation[] | null> {
-    if (process.env.NODE_ENV === 'development') return locationData;
-
     return this.#clients.accuWeather.fetchFromService(params);
   }
 }

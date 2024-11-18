@@ -34,7 +34,7 @@ describe('LocationController', () => {
   });
 
   describe('findAll', () => {
-    it('should error when "q" is not falsy', () => {
+    it('should error when "q" is falsy', () => {
       expect(controller.findAll({})).rejects.toThrow('Incomplete');
       expect(controller.findAll({ q: '' })).rejects.toThrow('Incomplete');
     });
