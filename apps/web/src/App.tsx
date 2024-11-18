@@ -1,8 +1,7 @@
 import { Box, Container, styled, Typography } from "@mui/material";
-import Form from "./components/Form";
-import Forecast from "./components/Forecast";
-import ErrorProvider from "./context/ErrorProvider";
-import ForecastProvider from "./context/ForecastProvider";
+import { Form, Forecast } from "@web/components";
+import ErrorProvider from "@web/context/ErrorProvider";
+import ForecastProvider from "@web/context/ForecastProvider";
 import backgroundImgUrl from "/noaa-weather.jpg";
 
 const StyledContainer = styled(Container)(({ theme }) => ({

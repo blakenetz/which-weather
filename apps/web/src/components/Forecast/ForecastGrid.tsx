@@ -4,7 +4,7 @@ import { ForecastContext } from "@web/context/ForecastContext";
 import use, { ReadResults } from "@web/hooks/use";
 import { startCase } from "lodash";
 import React, { Suspense } from "react";
-import Card from "./Card";
+import { Card } from "@web/components";
 
 interface ForecastGridProps {
   client: ForecastClient;

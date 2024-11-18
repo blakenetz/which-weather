@@ -1,6 +1,5 @@
 import { ForecastClient } from "@server/types";
-
-import ForecastGrid from "./ForecastGrid";
+import { ForecastGrid } from "@web/components";
 import { Box } from "@mui/material";
 
 const clients: ForecastClient[] = [
