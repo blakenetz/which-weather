@@ -10,45 +10,20 @@ import {
   AccuweatherForecastResponse,
   ForecastClient,
 } from '@server/types';
-import {
-  accuWeatherData,
-  openWeatherData,
-  weatherDotGovData,
-  weatherDotGovPointsData,
-} from '@test/data';
 
 type _ForecastClient = ForecastClient | 'weatherDotGovPoints';
 
-const testData: Record<_ForecastClient, object> = {
-  accuWeather: accuWeatherData,
-  openWeather: openWeatherData,
-  weatherDotGov: weatherDotGovData,
-  weatherDotGovPoints: weatherDotGovPointsData,
-};
-
-class _ClientService<T, R = Forecast[]> extends ClientService<
-  T,
-  R,
+class OpenWeatherClient extends ClientService<
+  OpenWeatherForecastResponse,
+  Forecast[],
   ForecastFormBody,
   _ForecastClient
 > {
-  async fetchFromService(p: ForecastFormBody): Promise<R | null> {
-    if (process.env.NODE_ENV === 'development') {
-      return (
-        super.client.formatter?.(testData[super.client.name!] as T) ?? null
-      );
-    }
-
-    return super.fetchFromService(p);
-  }
-}
-
-class OpenWeatherClient extends _ClientService<OpenWeatherForecastResponse> {
   constructor(httpService: HttpService) {
     super(httpService);
     this.client = {
       name: 'openWeather',
-      baseUrl: 'https://api.openweathermap.org/data/2.5/forecast',
+      baseUrl: 'https://api.openweathermap.org/data/2.5/forecast/',
       getSearchParams: (p) => ({
         lat: p.lat!,
         lon: p.long!,
@@ -69,12 +44,17 @@ class OpenWeatherClient extends _ClientService<OpenWeatherForecastResponse> {
   }
 }
 
-class AccuWeatherClient extends _ClientService<AccuweatherForecastResponse> {
+class AccuWeatherClient extends ClientService<
+  AccuweatherForecastResponse,
+  Forecast[],
+  ForecastFormBody,
+  _ForecastClient
+> {
   constructor(httpService: HttpService) {
     super(httpService);
     this.client = {
       name: 'accuWeather',
-      baseUrl: 'http://dataservice.accuweather.com/forecasts/v1/daily/5day',
+      baseUrl: 'http://dataservice.accuweather.com/forecasts/v1/daily/5day/',
       getUrlPath: (p) => p.key!,
       getSearchParams: () => ({ apikey: process.env.ACCUWEATHER_KEY! }),
       formatter: (data) => {
@@ -96,8 +76,18 @@ class AccuWeatherClient extends _ClientService<AccuweatherForecastResponse> {
   }
 }
 
-class WeatherDotGovClient extends _ClientService<WeatherDotGovForecastResponse> {
-  pointsClient: _ClientService<WeatherDotGovPointsResponse, string>;
+class WeatherDotGovClient extends ClientService<
+  WeatherDotGovForecastResponse,
+  Forecast[],
+  ForecastFormBody,
+  _ForecastClient
+> {
+  pointsClient: ClientService<
+    WeatherDotGovPointsResponse,
+    string,
+    ForecastFormBody,
+    _ForecastClient
+  >;
 
   constructor(httpService: HttpService) {
     super(httpService);
@@ -116,27 +106,29 @@ class WeatherDotGovClient extends _ClientService<WeatherDotGovForecastResponse> 
     };
 
     // add additional client for "points" endpoint
-    const pointsClient = new _ClientService<
+    const pointsClient = new ClientService<
       WeatherDotGovPointsResponse,
-      string
+      string,
+      ForecastFormBody,
+      _ForecastClient
     >(httpService);
     pointsClient.client = {
       name: 'weatherDotGovPoints',
-      baseUrl: 'https://api.weather.gov/points',
+      baseUrl: 'https://api.weather.gov/points/',
       getUrlPath: (p) => `${p.lat},${p.long}`,
       formatter: (data) => data.properties.forecast,
     };
     this.pointsClient = pointsClient;
   }
 
-  fetchFromService = async (p: ForecastFormBody) => {
+  async fetchFromService(p: ForecastFormBody) {
     const url = await this.pointsClient.fetchFromService(p);
     if (!url) return null;
 
     // update client url
     this.client = { baseUrl: url };
     return super.fetchFromService(p);
-  };
+  }
 }
 
 @Injectable()

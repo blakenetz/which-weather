@@ -6,36 +6,24 @@ import {
   LocationFormBody,
   WeatherLocation,
 } from '@server/types';
-import { locationData } from '@test/data/location';
 
-class _ClientService<T> extends ClientService<
-  T,
+class AccuWeatherClient extends ClientService<
+  AccuWeatherResponseItem[],
   WeatherLocation[],
   LocationFormBody,
   'accuWeather' | 'openWeather'
 > {
-  async fetchFromService(p: LocationFormBody) {
-    if (process.env.NODE_ENV === 'development') {
-      return locationData;
-    }
-
-    return super.fetchFromService(p);
-  }
-}
-
-class AccuWeatherClient extends _ClientService<AccuWeatherResponseItem[]> {
   constructor(httpService: HttpService) {
     super(httpService);
     this.client = {
       name: 'accuWeather',
       baseUrl: 'http://dataservice.accuweather.com/locations/v1/cities/search',
-      getSearchParams: () => ({
-        q: '',
-        limit: '5',
+      getSearchParams: (body) => ({
+        q: body.q!,
         apikey: process.env.ACCUWEATHER_KEY!,
       }),
       formatter: (data) => {
-        return data.map((d) => ({
+        return data.slice(0, 5).map((d) => ({
           key: d.Key,
           city: d.EnglishName,
           state: d.AdministrativeArea.EnglishName,
@@ -48,7 +36,12 @@ class AccuWeatherClient extends _ClientService<AccuWeatherResponseItem[]> {
   }
 }
 
-class OpenWeatherClient extends _ClientService<[]> {
+class OpenWeatherClient extends ClientService<
+  [],
+  WeatherLocation[],
+  LocationFormBody,
+  'accuWeather' | 'openWeather'
+> {
   constructor(httpService: HttpService) {
     super(httpService);
     this.client = {
@@ -69,8 +62,8 @@ export class LocationService {
 
   constructor(private readonly httpService: HttpService) {
     this.#clients = {
-      accuWeather: new AccuWeatherClient(httpService),
-      openWeather: new OpenWeatherClient(httpService),
+      accuWeather: new AccuWeatherClient(this.httpService),
+      openWeather: new OpenWeatherClient(this.httpService),
     };
   }
 
