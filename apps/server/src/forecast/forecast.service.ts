@@ -13,26 +13,26 @@ import {
   accuWeatherData,
   openWeatherData,
   weatherDotGovData,
+  weatherDotGovPointsData,
 } from '@test/data';
 import { AxiosError, AxiosResponse } from 'axios';
 import { firstValueFrom, catchError, of, map, Observable } from 'rxjs';
 
-const testData: Record<ForecastClient, object> = {
+type _ForecastClient = ForecastClient | 'weatherDotGovPoints';
+
+const testData: Record<_ForecastClient, object> = {
   accuWeather: accuWeatherData,
   openWeather: openWeatherData,
   weatherDotGov: weatherDotGovData,
+  weatherDotGovPoints: weatherDotGovPointsData,
 };
 
-type Formatter<T, R> = (data: T) => R;
-
-type ForecastReturn = Promise<Forecast[] | null>;
-
 interface ClientApi<T, R> {
-  name: ForecastClient;
+  name: _ForecastClient;
   baseUrl: string;
   generateUrl?: (p: ForecastFormBody) => URL;
   generateSearchParams?: (p: ForecastFormBody) => URLSearchParams;
-  formatter: Formatter<T, R>;
+  formatter: (data: T) => R;
 }
 
 class ClientService<T, R = Forecast[]> {
@@ -48,6 +48,7 @@ class ClientService<T, R = Forecast[]> {
       this.#client.generateUrl?.(p) ?? '/',
       this.#client.baseUrl,
     );
+
     const search =
       this.#client.generateSearchParams?.(p) ?? new URLSearchParams();
 
@@ -58,7 +59,7 @@ class ClientService<T, R = Forecast[]> {
 
   async fetchFromService(p: ForecastFormBody): Promise<R | null> {
     if (process.env.NODE_ENV === 'development') {
-      return this.client.formatter(testData[this.#client.name] as T);
+      return this.#client.formatter(testData[this.#client.name] as T);
     }
 
     const url = this.generateUrl(p);
@@ -75,8 +76,11 @@ class ClientService<T, R = Forecast[]> {
     );
   }
 
-  set client(clientApi: ClientApi<T, R>) {
-    this.client = clientApi;
+  set client(clientApi: Partial<ClientApi<T, R>>) {
+    this.#client = {
+      ...this.#client,
+      ...clientApi,
+    };
   }
 }
 
@@ -140,19 +144,6 @@ class WeatherDotGovClient extends ClientService<WeatherDotGovForecastResponse> {
 
   constructor(httpService: HttpService) {
     super(httpService);
-
-    const pointsClient = new ClientService<WeatherDotGovPointsResponse, string>(
-      httpService,
-    );
-    pointsClient.client = {
-      name: 'weatherDotGov',
-      baseUrl: 'https://api.weather.gov/points',
-      generateUrl: (p) => new URL(`${p.lat},${p.long}`),
-      formatter: (data) => data.properties.forecast,
-    };
-
-    this.pointsClient = pointsClient;
-
     this.client = {
       name: 'weatherDotGov',
       baseUrl: '', // updated in this `fetchFromService` method
@@ -166,28 +157,40 @@ class WeatherDotGovClient extends ClientService<WeatherDotGovForecastResponse> {
         }));
       },
     };
+
+    // add additional client for "points" endpoint
+    const pointsClient = new ClientService<WeatherDotGovPointsResponse, string>(
+      httpService,
+    );
+    pointsClient.client = {
+      name: 'weatherDotGovPoints',
+      baseUrl: 'https://api.weather.gov/points',
+      generateUrl: (p) => new URL(`${p.lat},${p.long}`),
+      formatter: (data) => data.properties.forecast,
+    };
+    this.pointsClient = pointsClient;
   }
 
-  async fetchFromService(p: ForecastFormBody): ForecastReturn {
+  fetchFromService = async (p: ForecastFormBody) => {
     const url = await this.pointsClient.fetchFromService(p);
     if (!url) return null;
 
     // update client url
-    this.client.baseUrl = url;
+    this.client = { baseUrl: url };
     return super.fetchFromService(p);
-  }
+  };
 }
 
 @Injectable()
 export class ForecastService {
-  clients: {
+  #clients: {
     openWeather: OpenWeatherClient;
     accuWeather: AccuWeatherClient;
     weatherDotGov: WeatherDotGovClient;
   };
 
   constructor(httpService: HttpService) {
-    this.clients = {
+    this.#clients = {
       openWeather: new OpenWeatherClient(httpService),
       accuWeather: new AccuWeatherClient(httpService),
       weatherDotGov: new WeatherDotGovClient(httpService),
@@ -197,7 +200,7 @@ export class ForecastService {
   async fetchFromClient(
     client: ForecastClient,
     params: ForecastFormBody,
-  ): ForecastReturn {
-    return this.clients[client].fetchFromService(params);
+  ): Promise<Forecast[] | null> {
+    return this.#clients[client].fetchFromService(params);
   }
 }

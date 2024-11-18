@@ -36,9 +36,6 @@ export class ForecastController {
     @Body() body: ForecastFormBody,
     @Param() params: { client: ForecastClient },
   ): Promise<Forecast[] | null> {
-    // artificial delay
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-
     const empty = !Object.keys(body).every(Boolean);
     if (empty) {
       throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
