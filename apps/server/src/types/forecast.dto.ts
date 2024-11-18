@@ -1,28 +1,71 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export type ForecastClient = 'accuWeather' | 'openWeather' | 'weatherDotGov';
 
 export class Forecast {
+  @ApiProperty()
   time: string;
-  temperature: [number, number] | number; // either tuple of min/max or set number
+
+  @ApiProperty({
+    oneOf: [
+      { type: 'number' },
+      {
+        type: 'array',
+        items: { type: 'number' },
+        minItems: 2,
+        maxItems: 2,
+      },
+    ],
+  })
+  temperature: [number, number] | number;
+
+  @ApiProperty({ required: false })
   feelsLike?: number;
+
+  @ApiProperty({ required: false })
   wind?: string;
+
+  @ApiProperty()
   icon: string;
+
+  @ApiProperty({ required: false })
   description?: string;
+
+  @ApiProperty({ required: false })
   link?: string;
 }
 
 export class ForecastResponseBody {
+  @ApiProperty()
   type: 'chunk' | 'error' | 'success';
+
+  @ApiProperty({ required: false })
   message?: string;
+
+  @ApiProperty()
   data: Forecast[] | null;
+
+  @ApiProperty({ required: false })
   client?: ForecastClient;
+
+  @ApiProperty({ required: false })
   progress: number;
 }
 
 export class ForecastFormBody {
+  @ApiProperty({ required: false })
   q?: string;
+  @ApiProperty({ required: false })
   lat?: string;
+  @ApiProperty({ required: false })
   long?: string;
+  @ApiProperty({ required: false })
   key?: string;
+}
+
+export class ForecastParams {
+  @ApiProperty({ enum: ['accuWeather', 'openWeather', 'weatherDotGov'] })
+  client: ForecastClient;
 }
 
 /**

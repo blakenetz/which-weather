@@ -14,12 +14,14 @@ import {
   Forecast,
   ForecastClient,
   ForecastFormBody,
+  ForecastParams,
   ForecastResponseBody,
 } from '@server/types';
 import { ForecastService } from './forecast.service';
 import { AppService } from '@server/app.service';
 import { Response } from 'express';
 import { LocationService } from '@server/location/location.service';
+import { ApiOkResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('forecast')
 @CacheKey('forecast')
@@ -32,9 +34,17 @@ export class ForecastController {
 
   @Post(':client')
   @UseInterceptors(NoFilesInterceptor())
+  @ApiOperation({ summary: 'Fetch forecast by client' })
+  @ApiResponse({ status: 422, description: 'Incomplete body one Request' })
+  @ApiResponse({ status: 503, description: '3rd party API is down' })
+  @ApiOkResponse({
+    description: 'The Forecast records',
+    type: Forecast,
+    isArray: true,
+  })
   async find(
     @Body() body: ForecastFormBody,
-    @Param() params: { client: ForecastClient },
+    @Param() params: ForecastParams,
   ): Promise<Forecast[] | null> {
     const empty = !Object.keys(body).every(Boolean);
     if (empty) {
@@ -88,13 +98,18 @@ export class ForecastController {
   // todo make this work
   @Post()
   @UseInterceptors(NoFilesInterceptor())
+  @ApiOperation({ summary: 'Query all forecast clients', deprecated: true })
   async findAll(
     @Body() body: ForecastFormBody,
     @Res() response: Response,
-  ): Promise<Forecast[]> {
+  ): Promise<Forecast[] | null> {
     const empty = !Object.keys(body).every(Boolean);
     if (empty) {
       throw new HttpException('Incomplete', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      throw new HttpException('Unavailable', HttpStatus.GONE);
     }
 
     // check cache
