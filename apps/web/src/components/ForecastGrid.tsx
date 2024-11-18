@@ -15,12 +15,12 @@ interface ForecastGridItemProps extends ForecastGridProps {
 }
 
 function fetchData(client: ForecastClient, body: FormData) {
-  const url = new URL(`forecast/${client}`, import.meta.env.VITE_SERVER);
-
-  return fetch(url.toString(), { method: "POST", body }).then(async (res) => {
-    if (res.ok) return res.json();
-    throw new Error(`Temporarily unavailable. Please try again later.`);
-  });
+  return fetch(`api/forecast/${client}`, { method: "POST", body }).then(
+    async (res) => {
+      if (res.ok) return res.json();
+      throw new Error(`Temporarily unavailable. Please try again later.`);
+    }
+  );
 }
 
 function Fallback() {
