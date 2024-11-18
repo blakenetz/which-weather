@@ -16,8 +16,6 @@ import { ErrorContext } from "@web/context/ErrorContext";
 import { ForecastContext } from "@web/context/ForecastContext";
 import { darkTheme } from "@web/theme";
 
-const locationURL = new URL("location", import.meta.env.VITE_SERVER).toString();
-
 export default function Form(props: BoxProps<"form">) {
   const errorCtx = React.useContext(ErrorContext);
   const forecastCtx = React.useContext(ForecastContext);
@@ -42,7 +40,7 @@ export default function Form(props: BoxProps<"form">) {
 
     if (!value) return;
 
-    fetch(locationURL, {
+    fetch("api/location", {
       method: "POST",
       body: JSON.stringify({ [name]: value }),
       headers: { "Content-Type": "application/json" },

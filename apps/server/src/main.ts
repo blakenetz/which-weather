@@ -4,10 +4,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'development' ? true : process.env.CORS_ORIGIN,
-  });
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('Which Weather')
