@@ -4,7 +4,6 @@ import { LocationService } from './location.service';
 import { HttpService } from '@nestjs/axios';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { AppService } from '@server/app.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { WeatherLocation } from '@server/types';
 
 describe('LocationController', () => {
@@ -18,7 +17,6 @@ describe('LocationController', () => {
       providers: [
         { provide: AppService, useValue: createMock<AppService>() },
         { provide: LocationService, useValue: createMock<LocationService>() },
-        { provide: CACHE_MANAGER, useValue: {} },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
