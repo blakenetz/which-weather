@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { ClientService } from '@server/client/client.service';
 import {
   OpenWeatherForecastResponse,
   WeatherDotGovPointsResponse,
@@ -15,8 +16,6 @@ import {
   weatherDotGovData,
   weatherDotGovPointsData,
 } from '@test/data';
-import { AxiosError, AxiosResponse } from 'axios';
-import { firstValueFrom, catchError, of, map, Observable } from 'rxjs';
 
 type _ForecastClient = ForecastClient | 'weatherDotGovPoints';
 
@@ -27,64 +26,27 @@ const testData: Record<_ForecastClient, object> = {
   weatherDotGovPoints: weatherDotGovPointsData,
 };
 
-interface ClientApi<T, R> {
-  name: _ForecastClient;
-  baseUrl: string;
-  generateUrl?: (p: ForecastFormBody) => URL;
-  generateSearchParams?: (p: ForecastFormBody) => URLSearchParams;
-  formatter: (data: T) => R;
-}
-
-class ClientService<T, R = Forecast[]> {
-  #client: ClientApi<T, R>;
-  fetch: (url: string) => Observable<AxiosResponse<T>>;
-
-  constructor(private readonly httpService: HttpService) {
-    this.fetch = httpService.get<T>;
-  }
-
-  private generateUrl(p: ForecastFormBody) {
-    const url = new URL(
-      this.#client.generateUrl?.(p) ?? '/',
-      this.#client.baseUrl,
-    );
-
-    const search =
-      this.#client.generateSearchParams?.(p) ?? new URLSearchParams();
-
-    url.search = search.toString();
-
-    return url.toString();
-  }
-
+class _ClientService<T, R = Forecast[]> extends ClientService<
+  T,
+  R,
+  ForecastFormBody,
+  _ForecastClient
+> {
   async fetchFromService(p: ForecastFormBody): Promise<R | null> {
-    if (process.env.NODE_ENV === 'development') {
-      return this.#client.formatter(testData[this.#client.name] as T);
+    if (
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'test'
+    ) {
+      return (
+        super.client.formatter?.(testData[super.client.name!] as T) ?? null
+      );
     }
 
-    const url = this.generateUrl(p);
-
-    return firstValueFrom(
-      this.fetch(url).pipe(
-        map((res) => this.#client.formatter(res.data)),
-        catchError((error: AxiosError) => {
-          // todo: implement logger
-          console.log('error!', error.response?.data);
-          return of(null);
-        }),
-      ),
-    );
-  }
-
-  set client(clientApi: Partial<ClientApi<T, R>>) {
-    this.#client = {
-      ...this.#client,
-      ...clientApi,
-    };
+    return super.fetchFromService(p);
   }
 }
 
-class OpenWeatherClient extends ClientService<OpenWeatherForecastResponse> {
+class OpenWeatherClient extends _ClientService<OpenWeatherForecastResponse> {
   constructor(httpService: HttpService) {
     super(httpService);
     this.client = {
@@ -111,7 +73,7 @@ class OpenWeatherClient extends ClientService<OpenWeatherForecastResponse> {
   }
 }
 
-class AccuWeatherClient extends ClientService<AccuweatherForecastResponse> {
+class AccuWeatherClient extends _ClientService<AccuweatherForecastResponse> {
   constructor(httpService: HttpService) {
     super(httpService);
     this.client = {
@@ -139,8 +101,8 @@ class AccuWeatherClient extends ClientService<AccuweatherForecastResponse> {
   }
 }
 
-class WeatherDotGovClient extends ClientService<WeatherDotGovForecastResponse> {
-  pointsClient: ClientService<WeatherDotGovPointsResponse, string>;
+class WeatherDotGovClient extends _ClientService<WeatherDotGovForecastResponse> {
+  pointsClient: _ClientService<WeatherDotGovPointsResponse, string>;
 
   constructor(httpService: HttpService) {
     super(httpService);
@@ -159,9 +121,10 @@ class WeatherDotGovClient extends ClientService<WeatherDotGovForecastResponse> {
     };
 
     // add additional client for "points" endpoint
-    const pointsClient = new ClientService<WeatherDotGovPointsResponse, string>(
-      httpService,
-    );
+    const pointsClient = new _ClientService<
+      WeatherDotGovPointsResponse,
+      string
+    >(httpService);
     pointsClient.client = {
       name: 'weatherDotGovPoints',
       baseUrl: 'https://api.weather.gov/points',

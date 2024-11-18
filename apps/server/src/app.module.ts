@@ -8,10 +8,11 @@ import { ForecastController } from './forecast/forecast.controller';
 import { ForecastService } from './forecast/forecast.service';
 import { LocationController } from './location/location.controller';
 import { LocationService } from './location/location.service';
+import { ClientService } from './client/client.service';
 
 @Module({
   imports: [ConfigModule.forRoot(), CacheModule.register(), HttpModule],
   controllers: [AppController, LocationController, ForecastController],
-  providers: [AppService, LocationService, ForecastService],
+  providers: [AppService, LocationService, ForecastService, ClientService],
 })
 export class AppModule {}

@@ -1,85 +1,89 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { AccuWeatherResponseItem, WeatherLocation } from '@server/types';
+import { ClientService } from '@server/client/client.service';
+import {
+  AccuWeatherResponseItem,
+  LocationFormBody,
+  WeatherLocation,
+} from '@server/types';
 import { locationData } from '@test/data/location';
-import { AxiosError } from 'axios';
-import { firstValueFrom, catchError, of, map } from 'rxjs';
 
-type LocationClientURLComponents = {
-  url: string;
-  search: Record<string, string>;
-};
+class _ClientService<T> extends ClientService<
+  T,
+  WeatherLocation[],
+  LocationFormBody,
+  'accuWeather' | 'openWeather'
+> {
+  async fetchFromService(p: LocationFormBody) {
+    if (
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'test'
+    ) {
+      return locationData;
+    }
 
-type LocationClientType = 'accuWeather' | 'openWeather';
-class LocationClient {
-  type: LocationClientType;
-  client: LocationClientURLComponents;
-
-  constructor(type: LocationClientType) {
-    this.type = type;
-    this.client = this.clients[type];
+    return super.fetchFromService(p);
   }
+}
 
-  private clients: Record<LocationClientType, LocationClientURLComponents> = {
-    accuWeather: {
-      url: 'http://dataservice.accuweather.com/locations/v1/cities/search',
-      search: { q: '', limit: '5', apikey: process.env.ACCUWEATHER_KEY! },
-    },
-    openWeather: {
-      url: 'http://api.openweathermap.org/geo/1.0/direct',
-      search: { q: '', limit: '5', appid: process.env.OPEN_WEATHER_KEY! },
-    },
-  };
+class AccuWeatherClient extends _ClientService<AccuWeatherResponseItem[]> {
+  constructor(httpService: HttpService) {
+    super(httpService);
+    this.client = {
+      name: 'accuWeather',
+      baseUrl: 'http://dataservice.accuweather.com/locations/v1/cities/search',
+      generateSearchParams: () =>
+        new URLSearchParams({
+          q: '',
+          limit: '5',
+          apikey: process.env.ACCUWEATHER_KEY!,
+        }),
+      formatter: (data) => {
+        return data.map((d) => ({
+          key: d.Key,
+          city: d.EnglishName,
+          state: d.AdministrativeArea.EnglishName,
+          country: d.Country.EnglishName,
+          lat: d.GeoPosition.Latitude,
+          long: d.GeoPosition.Longitude,
+        }));
+      },
+    };
+  }
+}
 
-  generateUrl(q: string) {
-    // create new URL interface
-    const url = new URL(this.client.url);
-    const search = new URLSearchParams(this.client.search);
-
-    search.set('q', q);
-    url.search = search.toString();
-
-    return url.toString();
+class OpenWeatherClient extends _ClientService<[]> {
+  constructor(httpService: HttpService) {
+    super(httpService);
+    this.client = {
+      name: 'openWeather',
+      baseUrl: 'http://api.openweathermap.org/geo/1.0/direct',
+      generateSearchParams: () =>
+        new URLSearchParams({
+          q: '',
+          limit: '5',
+          appid: process.env.OPEN_WEATHER_KEY!,
+        }),
+    };
   }
 }
 
 @Injectable()
 export class LocationService {
-  client: LocationClient;
+  #clients: { accuWeather: AccuWeatherClient; openWeather: OpenWeatherClient };
 
   constructor(private readonly httpService: HttpService) {
-    this.client = new LocationClient('accuWeather');
+    this.#clients = {
+      accuWeather: new AccuWeatherClient(httpService),
+      openWeather: new OpenWeatherClient(httpService),
+    };
   }
 
-  // todo uncouple from accuWeather
-  private formatResponse(data: AccuWeatherResponseItem[]): WeatherLocation[] {
-    return data.map((d) => ({
-      key: d.Key,
-      city: d.EnglishName,
-      state: d.AdministrativeArea.EnglishName,
-      country: d.Country.EnglishName,
-      lat: d.GeoPosition.Latitude,
-      long: d.GeoPosition.Longitude,
-    }));
-  }
-
-  async getLocations(q: string): Promise<WeatherLocation[] | null> {
+  async getLocations(
+    params: LocationFormBody,
+  ): Promise<WeatherLocation[] | null> {
     if (process.env.NODE_ENV === 'development') return locationData;
 
-    const url = this.client.generateUrl(q);
-
-    const data = await firstValueFrom(
-      this.httpService.get<AccuWeatherResponseItem[]>(url).pipe(
-        map((res) => this.formatResponse(res.data)),
-        catchError((error: AxiosError) => {
-          // todo: implement logger
-          console.log('error!', error.response?.data);
-
-          return of(null);
-        }),
-      ),
-    );
-
-    return data ?? null;
+    return this.#clients.accuWeather.fetchFromService(params);
   }
 }

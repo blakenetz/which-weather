@@ -7,6 +7,10 @@ export class WeatherLocation {
   long: number;
 }
 
+export class LocationFormBody {
+  q?: string;
+}
+
 export class AccuWeatherResponseItem {
   Key: string;
   EnglishName: string;

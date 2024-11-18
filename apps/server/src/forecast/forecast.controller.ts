@@ -62,7 +62,7 @@ export class ForecastController {
       const cached = await this.appService.fetchFromCache<Forecast[]>(cacheKey);
       if (cached) return cached;
 
-      const locations = await this.locationService.getLocations(body.q);
+      const locations = await this.locationService.getLocations(body);
       if (!locations) {
         throw new HttpException('Client Error', HttpStatus.SERVICE_UNAVAILABLE);
       }
