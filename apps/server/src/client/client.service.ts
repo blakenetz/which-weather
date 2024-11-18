@@ -8,8 +8,8 @@ import { firstValueFrom, catchError, of, map, Observable } from 'rxjs';
 export interface ClientApi<T, R = any, P = any, C = any> {
   name: C;
   baseUrl: string;
-  generateUrl?: (p: P) => URL;
-  generateSearchParams?: (p: P) => URLSearchParams;
+  getUrlPath?: (p: P) => string;
+  getSearchParams?: (p: P) => Record<string, string>;
   formatter: (data: T) => R;
 }
 
@@ -22,14 +22,13 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
     this.fetch = httpService.get<Type>;
   }
 
-  private generateUrl(p: Params) {
+  private getUrlPath(p: Params) {
     const url = new URL(
-      this.#client.generateUrl?.(p) ?? '/',
+      this.#client.getUrlPath?.(p) ?? '/',
       this.#client.baseUrl,
     );
 
-    const search =
-      this.#client.generateSearchParams?.(p) ?? new URLSearchParams();
+    const search = new URLSearchParams(this.#client.getSearchParams?.(p));
 
     url.search = search.toString();
 
@@ -37,7 +36,7 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
   }
 
   async fetchFromService(p: Params): Promise<Return | null> {
-    const url = this.generateUrl(p);
+    const url = this.getUrlPath(p);
 
     return firstValueFrom(
       this.fetch(url).pipe(

@@ -10,7 +10,6 @@ const jestConfig: JestConfigWithTsJest = {
     prefix: '../../../..',
   }),
   roots: ['<rootDir>/..'],
-  collectCoverage: true,
 };
 
 export default jestConfig;

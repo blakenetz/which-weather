@@ -32,12 +32,11 @@ class AccuWeatherClient extends _ClientService<AccuWeatherResponseItem[]> {
     this.client = {
       name: 'accuWeather',
       baseUrl: 'http://dataservice.accuweather.com/locations/v1/cities/search',
-      generateSearchParams: () =>
-        new URLSearchParams({
-          q: '',
-          limit: '5',
-          apikey: process.env.ACCUWEATHER_KEY!,
-        }),
+      getSearchParams: () => ({
+        q: '',
+        limit: '5',
+        apikey: process.env.ACCUWEATHER_KEY!,
+      }),
       formatter: (data) => {
         return data.map((d) => ({
           key: d.Key,
@@ -58,12 +57,11 @@ class OpenWeatherClient extends _ClientService<[]> {
     this.client = {
       name: 'openWeather',
       baseUrl: 'http://api.openweathermap.org/geo/1.0/direct',
-      generateSearchParams: () =>
-        new URLSearchParams({
-          q: '',
-          limit: '5',
-          appid: process.env.OPEN_WEATHER_KEY!,
-        }),
+      getSearchParams: () => ({
+        q: '',
+        limit: '5',
+        appid: process.env.OPEN_WEATHER_KEY!,
+      }),
     };
   }
 }

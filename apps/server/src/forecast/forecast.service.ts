@@ -52,13 +52,12 @@ class OpenWeatherClient extends _ClientService<OpenWeatherForecastResponse> {
     this.client = {
       name: 'openWeather',
       baseUrl: 'https://api.openweathermap.org/data/2.5/forecast',
-      generateSearchParams: (p) =>
-        new URLSearchParams({
-          lat: p.lat!,
-          lon: p.long!,
-          appid: process.env.OPEN_WEATHER_KEY!,
-          units: 'imperial',
-        }),
+      getSearchParams: (p) => ({
+        lat: p.lat!,
+        lon: p.long!,
+        appid: process.env.OPEN_WEATHER_KEY!,
+        units: 'imperial',
+      }),
       formatter: (data) => {
         return data.list.map((item) => ({
           time: item.dt_txt,
@@ -79,9 +78,8 @@ class AccuWeatherClient extends _ClientService<AccuweatherForecastResponse> {
     this.client = {
       name: 'accuWeather',
       baseUrl: 'http://dataservice.accuweather.com/forecasts/v1/daily/5day',
-      generateUrl: (p) => new URL(p.key!),
-      generateSearchParams: () =>
-        new URLSearchParams({ apikey: process.env.ACCUWEATHER_KEY! }),
+      getUrlPath: (p) => p.key!,
+      getSearchParams: () => ({ apikey: process.env.ACCUWEATHER_KEY! }),
       formatter: (data) => {
         const numberFormatter = new Intl.NumberFormat('en-US', {
           minimumIntegerDigits: 2,
@@ -128,7 +126,7 @@ class WeatherDotGovClient extends _ClientService<WeatherDotGovForecastResponse> 
     pointsClient.client = {
       name: 'weatherDotGovPoints',
       baseUrl: 'https://api.weather.gov/points',
-      generateUrl: (p) => new URL(`${p.lat},${p.long}`),
+      getUrlPath: (p) => `${p.lat},${p.long}`,
       formatter: (data) => data.properties.forecast,
     };
     this.pointsClient = pointsClient;
