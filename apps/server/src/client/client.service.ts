@@ -57,4 +57,8 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
       ...clientApi,
     };
   }
+
+  get client() {
+    return this.#client;
+  }
 }
