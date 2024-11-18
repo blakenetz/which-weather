@@ -33,10 +33,7 @@ class _ClientService<T, R = Forecast[]> extends ClientService<
   _ForecastClient
 > {
   async fetchFromService(p: ForecastFormBody): Promise<R | null> {
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'test'
-    ) {
+    if (process.env.NODE_ENV === 'development') {
       return (
         super.client.formatter?.(testData[super.client.name!] as T) ?? null
       );

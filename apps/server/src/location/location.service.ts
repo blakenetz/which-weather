@@ -15,10 +15,7 @@ class _ClientService<T> extends ClientService<
   'accuWeather' | 'openWeather'
 > {
   async fetchFromService(p: LocationFormBody) {
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'test'
-    ) {
+    if (process.env.NODE_ENV === 'development') {
       return locationData;
     }
 
