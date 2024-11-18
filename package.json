@@ -10,7 +10,7 @@
     "start:server": "pnpm --filter server start:prod",
     "start:web": "pnpm --filter web start",
     "lint": "pnpm run -r --aggregate-output lint",
-    "test": "pnpm run -r --aggregate-output test"
+    "test": "pnpm run --parallel test"
   },
   "keywords": [],
   "author": "",

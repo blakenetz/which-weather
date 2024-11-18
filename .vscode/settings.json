@@ -1,3 +1,10 @@
 {
-  "cSpell.words": ["accuWeather", "clickaway", "latlong", "weatherDotGov"]
+  "cSpell.words": [
+    "accuWeather",
+    "clickaway",
+    "golevelup",
+    "latlong",
+    "weatherDotGov"
+  ],
+  "jestrunner.configPath": "./apps/server/test/jest.config.ts"
 }

@@ -3,21 +3,17 @@ import {
   Controller,
   HttpException,
   HttpStatus,
-  Inject,
   Post,
 } from '@nestjs/common';
-import { LocationService } from './location.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { WeatherLocation } from '@server/types';
 import { AppService } from '@server/app.service';
+import { WeatherLocation } from '@server/types';
+import { LocationService } from './location.service';
 
 @Controller('location')
 export class LocationController {
   constructor(
     private readonly locationService: LocationService,
     private readonly appService: AppService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Post()
