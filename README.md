@@ -2,8 +2,9 @@
 
 Compare weather forecasts across 3 major services.
 
-Live @ <https://which-weather-production.up.railway.app/api>
-Swagger UI @ <https://server-production-da7a.up.railway.app/api>
+Live @ <https://which-weather-production.up.railway.app>
+
+Swagger UI @ <https://server-production-da7a.up.railway.app/docs>
 
 ## Tech Stack
 

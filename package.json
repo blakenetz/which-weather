@@ -8,8 +8,7 @@
     "build": "pnpm run --parallel build",
     "build:server": "pnpm --filter server build",
     "build:web": "pnpm --filter web build",
-    "start:server": "pnpm --filter server start",
-    "start:web": "pnpm --filter web start",
+    "start": "pnpm --filter server start",
     "lint": "pnpm run -r --aggregate-output lint",
     "test": "pnpm run --parallel test"
   },
