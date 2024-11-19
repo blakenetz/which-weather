@@ -5,7 +5,7 @@ import { ForecastClient } from '@server/types';
 import { AxiosError } from 'axios';
 import { firstValueFrom, catchError, of, map } from 'rxjs';
 
-export interface ClientApi<T, R = any, P = any, C = any> {
+export class ClientApi<T, R = any, P = any, C = any> {
   name: C;
   baseUrl: string;
   getUrlPath?: (p: P) => string;

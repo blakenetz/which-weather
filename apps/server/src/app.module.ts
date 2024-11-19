@@ -6,7 +6,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ClientService } from './client/client.service';
+import { ClientApi, ClientService } from './client/client.service';
 import { ForecastController } from './forecast/forecast.controller';
 import { ForecastService } from './forecast/forecast.service';
 import { LocationController } from './location/location.controller';
@@ -23,6 +23,11 @@ import { LocationService } from './location/location.service';
     }),
   ],
   controllers: [AppController, LocationController, ForecastController],
-  providers: [AppService, LocationService, ForecastService, ClientService],
+  providers: [
+    AppService,
+    LocationService,
+    ForecastService,
+    { provide: ClientService, useClass: ClientApi },
+  ],
 })
 export class AppModule {}
