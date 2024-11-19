@@ -4,8 +4,9 @@
 type PromiseStatus = "pending" | "fulfilled" | "rejected";
 
 export type ReadResults<T> = { data: T; error?: Error };
+export type Reader<T> = { read: () => ReadResults<T> };
 
-export default function use<T>(promise: Promise<T>) {
+export default function use<T>(promise: Promise<T>): Reader<T> {
   let status: PromiseStatus = "pending";
   let result: T;
   let error: Error;
@@ -25,6 +26,7 @@ export default function use<T>(promise: Promise<T>) {
     read(): ReadResults<T> {
       switch (status) {
         case "pending":
+          console.log("hmmm");
           throw suspender;
 
         case "rejected":

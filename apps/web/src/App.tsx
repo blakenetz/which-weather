@@ -1,5 +1,5 @@
 import { Box, Container, styled, Typography } from "@mui/material";
-import { Form, Forecast } from "@web/components";
+import { Form, Forecast, Chart } from "@web/components";
 import ErrorProvider from "@web/context/ErrorProvider";
 import ForecastProvider from "@web/context/ForecastProvider";
 import backgroundImgUrl from "/noaa-weather.jpg";
@@ -42,6 +42,7 @@ export default function App() {
           </StyledContainer>
         </Box>
         <StyledContainer>
+          <Chart />
           <Forecast />
         </StyledContainer>
       </ForecastProvider>

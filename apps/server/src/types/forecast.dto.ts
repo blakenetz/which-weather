@@ -2,6 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export type ForecastClient = 'accuWeather' | 'openWeather' | 'weatherDotGov';
 
+export type ForecastChartData = {
+  x: string;
+  y: number;
+  type: 'high' | 'low' | 'avg';
+};
+
 export class Forecast {
   @ApiProperty()
   time: string;
@@ -33,6 +39,9 @@ export class Forecast {
 
   @ApiProperty({ required: false })
   link?: string;
+
+  @ApiProperty()
+  chart: ForecastChartData[];
 }
 
 export class ForecastResponseBody {
@@ -94,21 +103,33 @@ export class WeatherDotGovPointsResponse {
           '@type'?: string;
         };
         bearing?: {
-          '@id': string;
+          '@id'?: string;
           '@type'?: string;
         };
         value?: {
-          '@id': string;
+          '@id'?: string;
           '@type'?: string;
         };
         unitCode?: {
-          '@id': string;
+          '@id'?: string;
           '@type'?: string;
         };
-        forecastOffice?: string;
-        forecastGridData?: string;
-        publicZone?: string;
-        county?: string;
+        forecastOffice?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
+        forecastGridData?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
+        publicZone?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
+        county?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
       }
   )[];
   id: string;

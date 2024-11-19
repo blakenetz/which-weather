@@ -6,6 +6,7 @@ import {
   LocationFormBody,
   WeatherLocation,
 } from '@server/types';
+import { locationData } from '@test/data';
 
 class AccuWeatherClient extends ClientService<
   AccuWeatherResponseItem[],
@@ -33,6 +34,7 @@ class AccuWeatherClient extends ClientService<
         }));
       },
     };
+    this.testData = locationData;
   }
 }
 

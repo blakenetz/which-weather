@@ -10,6 +10,12 @@ import {
   AccuweatherForecastResponse,
   ForecastClient,
 } from '@server/types';
+import {
+  accuWeatherData,
+  openWeatherData,
+  weatherDotGovData,
+  weatherDotGovPointsData,
+} from '@test/data';
 
 type _ForecastClient = ForecastClient | 'weatherDotGovPoints';
 
@@ -38,9 +44,14 @@ class OpenWeatherClient extends ClientService<
           wind: `${item.wind.speed}mph @ ${item.wind.deg}°`,
           icon: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`,
           description: item.weather[0].description,
+          chart: [
+            { type: 'low', x: item.dt_txt, y: item.main.temp_min },
+            { type: 'high', x: item.dt_txt, y: item.main.temp_max },
+          ],
         }));
       },
     };
+    this.testData = openWeatherData;
   }
 }
 
@@ -70,9 +81,14 @@ class AccuWeatherClient extends ClientService<
           ],
           icon: `https://developer.accuweather.com/sites/default/files/${numberFormatter.format(item.Day.Icon)}-s.png`,
           link: item.Link,
+          chart: [
+            { type: 'low', x: item.Date, y: item.Temperature.Minimum.Value },
+            { type: 'high', x: item.Date, y: item.Temperature.Maximum.Value },
+          ],
         }));
       },
     };
+    this.testData = accuWeatherData;
   }
 }
 
@@ -101,9 +117,11 @@ class WeatherDotGovClient extends ClientService<
           wind: [item.windSpeed, item.windDirection].join(' '),
           icon: item.icon,
           description: item.detailedForecast,
+          chart: [{ type: 'avg', x: item.startTime, y: item.temperature }],
         }));
       },
     };
+    this.testData = weatherDotGovData;
 
     // add additional client for "points" endpoint
     const pointsClient = new ClientService<
@@ -118,6 +136,7 @@ class WeatherDotGovClient extends ClientService<
       getUrlPath: (p) => `${p.lat},${p.long}`,
       formatter: (data) => data.properties.forecast,
     };
+    pointsClient.testData = weatherDotGovPointsData;
     this.pointsClient = pointsClient;
   }
 

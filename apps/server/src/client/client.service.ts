@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ForecastClient } from '@server/types';
-
 import { AxiosError } from 'axios';
 import { firstValueFrom, catchError, of, map } from 'rxjs';
 
@@ -16,6 +15,7 @@ export interface ClientApi<T, R = any, P = any, C = any> {
 @Injectable()
 export class ClientService<Type, Return, Params, Client = ForecastClient> {
   #client: ClientApi<Type, Return, Params, Client>;
+  #testData?: Type;
 
   constructor(private readonly httpService: HttpService) {
     this.fetchFromService = this.fetchFromService.bind(this);
@@ -37,6 +37,10 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
   fetchFromService(p: Params): Promise<Return | null> {
     const url = this.getUrlPath(p);
 
+    if (process.env.NODE_ENV === 'development' && this.#testData) {
+      return Promise.resolve(this.#client.formatter(this.testData));
+    }
+
     return firstValueFrom(
       this.httpService.get(url).pipe(
         map((res) => this.#client.formatter(res.data)),
@@ -55,8 +59,14 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
       ...clientApi,
     };
   }
-
   get client() {
     return this.#client;
+  }
+
+  set testData(d: Type) {
+    this.#testData = d;
+  }
+  get testData() {
+    return this.#testData as Type;
   }
 }

@@ -4,12 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "pnpm --filter server start",
     "dev": "pnpm run --parallel dev",
     "build": "pnpm run --parallel build",
     "build:server": "pnpm --filter server build",
     "build:web": "pnpm --filter web build",
-    "start:server": "pnpm --filter server start",
-    "start:web": "pnpm --filter web start",
     "lint": "pnpm run -r --aggregate-output lint",
     "test": "pnpm run --parallel test"
   },
