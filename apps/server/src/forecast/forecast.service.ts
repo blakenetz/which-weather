@@ -117,7 +117,7 @@ class WeatherDotGovClient extends ClientService<
   >;
 
   constructor(httpService: HttpService) {
-    super(httpService, weatherDotGovClient, weatherDotGovData);
+    super(httpService, weatherDotGovClient, { data: weatherDotGovData });
 
     // add additional client for "points" endpoint
     const pointsClient = new ClientService<
@@ -125,13 +125,16 @@ class WeatherDotGovClient extends ClientService<
       string,
       ForecastFormBody,
       _ForecastClient
-    >(httpService, weatherDotGovPointsClient, weatherDotGovPointsData);
+    >(httpService, weatherDotGovPointsClient, {
+      data: weatherDotGovPointsData,
+    });
 
     this.pointsClient = pointsClient;
   }
 
   async fetchFromService(p: ForecastFormBody) {
     const url = await this.pointsClient.fetchFromService(p);
+    console.log({ url });
     if (!url) return null;
 
     // update client url
@@ -160,16 +163,12 @@ export class ForecastService {
 
   constructor(httpService: HttpService) {
     this.#clients = {
-      openWeather: new ClientService(
-        httpService,
-        openWeatherClient,
-        openWeatherData,
-      ),
-      accuWeather: new ClientService(
-        httpService,
-        accuWeatherClient,
-        accuWeatherData,
-      ),
+      openWeather: new ClientService(httpService, openWeatherClient, {
+        data: openWeatherData,
+      }),
+      accuWeather: new ClientService(httpService, accuWeatherClient, {
+        data: accuWeatherData,
+      }),
       weatherDotGov: new WeatherDotGovClient(httpService),
     };
   }

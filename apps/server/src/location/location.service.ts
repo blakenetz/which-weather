@@ -69,11 +69,9 @@ export class LocationService {
 
   constructor(private readonly httpService: HttpService) {
     this.#clients = {
-      accuWeather: new ClientService(
-        this.httpService,
-        accuWeatherClient,
-        locationData,
-      ),
+      accuWeather: new ClientService(this.httpService, accuWeatherClient, {
+        data: locationData,
+      }),
       openWeather: new ClientService(this.httpService, openWeatherClient),
     };
   }

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClientService } from './client.service';
+import { ClientApi, ClientService, ClientTestData } from './client.service';
 import { HttpService } from '@nestjs/axios';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { of } from 'rxjs';
@@ -15,6 +15,11 @@ describe('ClientService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ClientService,
+        ClientApi,
+        {
+          provide: ClientTestData,
+          useValue: createMock<ClientTestData<object>>(),
+        },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();

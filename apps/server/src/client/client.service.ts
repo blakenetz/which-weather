@@ -13,6 +13,10 @@ export class ClientApi<T, R = any, P = any, C = any> {
   formatter: (data: T) => R;
 }
 
+export class ClientTestData<T> {
+  data?: T;
+}
+
 @Injectable()
 export class ClientService<Type, Return, Params, Client = ForecastClient> {
   #client: ClientApi<Type, Return, Params, Client>;
@@ -20,7 +24,7 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
   constructor(
     private readonly httpService: HttpService,
     client: ClientApi<Type, Return, Params, Client>,
-    private readonly testData?: Type,
+    private readonly testData?: ClientTestData<Type>,
   ) {
     this.fetchFromService = this.fetchFromService.bind(this);
     this.#client = client;
@@ -40,8 +44,8 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
   }
 
   fetchFromService(p: Params): Promise<Return | null> {
-    if (process.env.NODE_ENV === 'development' && this.testData) {
-      return Promise.resolve(this.#client.formatter(this.testData));
+    if (process.env.NODE_ENV === 'development' && this.testData?.data) {
+      return Promise.resolve(this.#client.formatter(this.testData.data));
     }
 
     const url = this.getUrlPath(p);
