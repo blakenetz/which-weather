@@ -6,15 +6,7 @@ settings:
 
 importers:
 
-  .:
-    dependencies:
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-    devDependencies:
-      '@types/lodash':
-        specifier: ^4.17.13
-        version: 4.17.13
+  .: {}
 
   apps/server:
     dependencies:
@@ -164,6 +156,9 @@ importers:
       '@testing-library/user-event':
         specifier: ^14.5.2
         version: 14.5.2(@testing-library/dom@10.4.0)
+      '@types/lodash':
+        specifier: ^4.17.13
+        version: 4.17.13
       '@types/react':
         specifier: ^18.3.12
         version: 18.3.12
