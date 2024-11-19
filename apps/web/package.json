@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "NODE_ENV=production vite preview",
     "dev": "NODE_ENV=development vite",
     "build": "vite build",
     "lint": "eslint .",

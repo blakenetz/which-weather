@@ -16,7 +16,7 @@ interface ForecastGridItemProps extends ForecastGridProps {
 
 function fetchData(client: ForecastClient, body: FormData) {
   return fetch(`api/forecast/${client}`, { method: "POST", body }).then(
-    async (res) => {
+    (res) => {
       if (res.ok) return res.json();
       throw new Error(`Temporarily unavailable. Please try again later.`);
     }

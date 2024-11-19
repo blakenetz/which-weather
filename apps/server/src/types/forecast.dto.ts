@@ -84,31 +84,43 @@ export class WeatherDotGovPointsResponse {
         unit?: string;
         '@vocab'?: string;
         geometry?: {
-          '@id': string;
-          '@type': string;
+          '@id'?: string;
+          '@type'?: string;
         };
         city?: string;
         state?: string;
         distance?: {
-          '@id': string;
+          '@id'?: string;
           '@type'?: string;
         };
         bearing?: {
-          '@id': string;
+          '@id'?: string;
           '@type'?: string;
         };
         value?: {
-          '@id': string;
+          '@id'?: string;
           '@type'?: string;
         };
         unitCode?: {
-          '@id': string;
+          '@id'?: string;
           '@type'?: string;
         };
-        forecastOffice?: string;
-        forecastGridData?: string;
-        publicZone?: string;
-        county?: string;
+        forecastOffice?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
+        forecastGridData?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
+        publicZone?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
+        county?: {
+          '@id'?: string;
+          '@type'?: string;
+        };
       }
   )[];
   id: string;

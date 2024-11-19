@@ -1,4 +1,6 @@
-export const weatherDotGovPointsData = {
+import { WeatherDotGovPointsResponse } from '@server/types';
+
+export const weatherDotGovPointsData: WeatherDotGovPointsResponse = {
   '@context': [
     'https://geojson.org/geojson-ld/geojson-context.jsonld',
     {

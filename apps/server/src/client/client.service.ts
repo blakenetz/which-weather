@@ -17,8 +17,13 @@ export interface ClientApi<T, R = any, P = any, C = any> {
 export class ClientService<Type, Return, Params, Client = ForecastClient> {
   #client: ClientApi<Type, Return, Params, Client>;
 
-  constructor(private readonly httpService: HttpService) {
+  constructor(
+    private readonly httpService: HttpService,
+    client: ClientApi<Type, Return, Params, Client>,
+    private readonly testData?: Type,
+  ) {
     this.fetchFromService = this.fetchFromService.bind(this);
+    this.#client = client;
   }
 
   private getUrlPath(p: Params) {
@@ -35,13 +40,16 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
   }
 
   fetchFromService(p: Params): Promise<Return | null> {
+    if (process.env.NODE_ENV === 'development' && this.testData) {
+      return Promise.resolve(this.#client.formatter(this.testData));
+    }
+
     const url = this.getUrlPath(p);
 
     return firstValueFrom(
       this.httpService.get(url).pipe(
         map((res) => this.#client.formatter(res.data)),
         catchError((error: AxiosError) => {
-          // todo: implement logger
           console.log('error!', error.response?.data);
           return of(null);
         }),
@@ -55,7 +63,6 @@ export class ClientService<Type, Return, Params, Client = ForecastClient> {
       ...clientApi,
     };
   }
-
   get client() {
     return this.#client;
   }
