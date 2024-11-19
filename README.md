@@ -1,13 +1,13 @@
 # Which Weather
 
-Compare weather forecasts
+Compare weather forecasts across 3 major services.
+
+Live @ <https://which-weather-production.up.railway.app/api>
+Swagger UI @ <https://server-production-da7a.up.railway.app/api>
 
 ## Tech Stack
 
-- Nest.js
-- React
-- Swagger
-
-## Deployment
-
-Swagger UI is available at https://server-production-da7a.up.railway.app/api
+- Nest.js backend
+- React frontend
+- Documentation w/ Swagger
+- Testing w/ vitest and jest
