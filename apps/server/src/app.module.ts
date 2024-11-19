@@ -18,7 +18,7 @@ import { LocationService } from './location/location.service';
     CacheModule.register(),
     HttpModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../..', 'web', 'dist'),
+      rootPath: join(__dirname, '../../..', 'web', 'dist'),
       exclude: ['/api/(.*)'],
     }),
   ],
