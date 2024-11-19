@@ -9,6 +9,7 @@ type _ClientService = ClientService<object, object, object>;
 
 describe('ClientService', () => {
   let service: DeepMocked<_ClientService>;
+  let httpService: DeepMocked<HttpService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -19,6 +20,7 @@ describe('ClientService', () => {
     }).compile();
 
     service = module.get(ClientService);
+    httpService = module.get(HttpService);
   });
 
   it('should be defined', () => {
@@ -38,7 +40,7 @@ describe('ClientService', () => {
       expect(url).toBe(baseUrl);
     });
     it('should use getUrlPath', () => {
-      const path = '/hi';
+      const path = 'hi';
       service.client = { baseUrl, getUrlPath: () => path };
       const url = service['getUrlPath']({});
       expect(url).toBe(baseUrl + path);
@@ -66,7 +68,7 @@ describe('ClientService', () => {
     beforeEach(() => {
       service.client = { baseUrl: 'https://localhost:3000' };
 
-      service.fetch.mockImplementation(() => of(res));
+      httpService.get.mockImplementation(() => of(res));
     });
 
     afterAll(() => {
