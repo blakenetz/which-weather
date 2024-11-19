@@ -32,7 +32,7 @@ export class Forecast {
   description?: string;
 
   @ApiProperty({ required: false })
-  link?: string;
+  link: string;
 }
 
 export class ForecastResponseBody {

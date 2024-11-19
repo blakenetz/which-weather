@@ -41,6 +41,7 @@ const openWeatherClient: ClientApi<
       wind: `${item.wind.speed}mph @ ${item.wind.deg}°`,
       icon: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`,
       description: item.weather[0].description,
+      link: `https://openweathermap.org/city/${data.city.id}`,
     }));
   },
 };
@@ -87,6 +88,7 @@ const weatherDotGovClient: ClientApi<
       wind: [item.windSpeed, item.windDirection].join(' '),
       icon: item.icon,
       description: item.detailedForecast,
+      link: `https://forecast.weather.gov/MapClick.php?lat=${data.geometry.coordinates[0][0][1]}&lon=${data.geometry.coordinates[0][0][0]}`,
     }));
   },
 };

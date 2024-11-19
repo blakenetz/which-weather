@@ -73,45 +73,55 @@ export default function Card({ data }: CardProps) {
   const isDark = isAfternoon(data.time);
 
   return (
-    <MuiCard raised sx={{ minWidth: 300 }}>
-      <CardHeader
-        title={date}
-        avatar={data.icon && <Avatar src={data.icon} />}
-        sx={{
-          alignItems: "flex-start",
-          bgcolor: isDark ? "grey.900" : "primary.light",
-          color: isDark ? "primary.contrastText" : "text.primary",
-        }}
-      />
+    <MuiCard
+      raised
+      sx={{
+        minWidth: 300,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
+      <div>
+        <CardHeader
+          title={date}
+          avatar={data.icon && <Avatar src={data.icon} />}
+          sx={{
+            alignItems: "flex-start",
+            bgcolor: isDark ? "grey.900" : "primary.light",
+            color: isDark ? "primary.contrastText" : "text.primary",
+          }}
+        />
 
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {data.description}
-        </Typography>
-        <Section>
-          <Thermostat />
-          <Stack>
-            {Array.isArray(data.temperature) ? (
-              <div>
-                <Temperature type="high" temp={data.temperature[0]} />
-                <Temperature type="low" temp={data.temperature[1]} />
-              </div>
-            ) : (
-              <Temperature temp={data.temperature} />
-            )}
-            {data.feelsLike && (
-              <Temperature type="feelsLike" temp={data.feelsLike} />
-            )}
-          </Stack>
-        </Section>
-
-        {data.wind && (
+        <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            {data.description}
+          </Typography>
           <Section>
-            <Air />
-            <Typography>{data.wind}</Typography>
+            <Thermostat />
+            <Stack>
+              {Array.isArray(data.temperature) ? (
+                <div>
+                  <Temperature type="high" temp={data.temperature[1]} />
+                  <Temperature type="low" temp={data.temperature[0]} />
+                </div>
+              ) : (
+                <Temperature temp={data.temperature} />
+              )}
+              {data.feelsLike && (
+                <Temperature type="feelsLike" temp={data.feelsLike} />
+              )}
+            </Stack>
           </Section>
-        )}
-      </CardContent>
+
+          {data.wind && (
+            <Section>
+              <Air />
+              <Typography>{data.wind}</Typography>
+            </Section>
+          )}
+        </CardContent>
+      </div>
 
       {data.link && (
         <CardActions sx={{ justifyContent: "flex-end" }}>
